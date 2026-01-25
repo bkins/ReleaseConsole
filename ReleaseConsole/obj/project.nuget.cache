@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "dgSpecHash": "MJqCFF4Biv4=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\benho\\source\\repos\\ReleaseConsole\\ReleaseConsole\\ReleaseConsole.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.2\\microsoft.extensions.configuration.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.2\\microsoft.extensions.configuration.abstractions.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.2\\microsoft.extensions.configuration.binder.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.2\\microsoft.extensions.dependencyinjection.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.2\\microsoft.extensions.dependencyinjection.abstractions.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.logging\\10.0.2\\microsoft.extensions.logging.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.2\\microsoft.extensions.logging.abstractions.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.logging.configuration\\10.0.2\\microsoft.extensions.logging.configuration.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.logging.console\\10.0.2\\microsoft.extensions.logging.console.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.options\\10.0.2\\microsoft.extensions.options.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.2\\microsoft.extensions.options.configurationextensions.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.2\\microsoft.extensions.primitives.10.0.2.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\system.commandline\\2.0.0-beta4.22272.1\\system.commandline.2.0.0-beta4.22272.1.nupkg.sha512"
+  ],
+  "logs": []
+}
