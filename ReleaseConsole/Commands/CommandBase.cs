@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using ReleaseConsole.Core;
 using ReleaseConsole.Services;
+using ReleaseConsole.Services.Interfaces;
 using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole.Commands;
@@ -10,25 +11,27 @@ public abstract class CommandBaseCommand : ICommand, ILogger
     protected readonly IAuditLog AuditLog;
     protected readonly ILogger   Logger;
 
+    protected virtual ScriptOutputMode OutputMode => ScriptOutputMode.ErrorsOnly;
+    
     protected CommandBaseCommand(IAuditLog auditLog, ILogger logger)
     {
         AuditLog = auditLog;
         Logger   = logger;
     }
 
-    public abstract string Name        { get; }
-    public abstract string Description { get; }
+    public abstract string              Name           { get; }
+    public abstract string              Description    { get; }
 
-    public async Task<CommandResult> ExecuteAsync(CancellationToken ct = default)
+    public async Task<CommandResult> ExecuteAsync(Action<string>? report = null)
     {
-        Logger.LogInformation("Executing command: {CommandName}", Name);
-        
-        var           startTime = DateTime.UtcNow;
+        var startTime = DateTime.UtcNow;
+    
         CommandResult result;
 
         try
         {
-            result = await ExecuteInternalAsync(ct);
+            // Pass the reporter through so derived commands can update the UI spinner.
+            result = await ExecuteInternalAsync(CancellationToken.None, report);
         }
         catch (Exception ex)
         {
@@ -37,23 +40,23 @@ public abstract class CommandBaseCommand : ICommand, ILogger
         }
 
         var duration = DateTime.UtcNow - startTime;
-        Logger.LogInformation(
-            "Command {CommandName} completed in {Duration}ms with status: {Success}",
-            Name,
-            duration.TotalMilliseconds,
-            result.Success ? "Success" : "Failure"
-        );
+        // Logger.LogInformation("Command {CommandName} completed in {Duration}ms with status: {Success}"
+        //                     , Name
+        //                     , duration.TotalMilliseconds
+        //                     , result.Success
+        //                               ? "Success"
+        //                               : "Failure");
 
-        await LogAuditEntryAsync(result, ct);
+        await LogAuditEntryAsync(result, CancellationToken.None);
 
         return result;
     }
 
-    protected abstract Task<CommandResult> ExecuteInternalAsync(CancellationToken ct);
-
+    protected abstract Task<CommandResult> ExecuteInternalAsync(CancellationToken ct, Action<string>? report = null);
+    
     protected virtual Task LogAuditEntryAsync(CommandResult result, CancellationToken ct)
     {
-        var entry = new AuditEntry(DateTime.UtcNow
+        var entry = new AuditEntry(DateTime.UtcNow.ToLocalTime()
                                  , Name
                                  , GetComponentName() ?? "N/A"
                                  , GetEnvironment()

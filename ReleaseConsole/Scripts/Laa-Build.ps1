@@ -1,150 +1,160 @@
 ﻿<#
 .SYNOPSIS
-Builds the Local AI Assistant MAUI application for a given environment.
+Builds the Local AI Assistant MAUI application for ONE specific environment.
 
 .DESCRIPTION
 This script builds the MAUI Android application for the specified environment
-and version. It produces a signed APK artifact in the environment-specific
-output directory.
+and version. It produces a single signed APK artifact for that environment only.
 
-This script is intended to be invoked by ReleaseConsole.
+This script is invoked by ReleaseConsoles BuildCommand.
 It does not generate versions, enforce promotion rules, or manage artifacts.
 
+IMPORTANT: This script builds ONLY the specified environment, not all environments.
+
 .PARAMETER Environment
-Target environment. Valid values: DEV, QA, PROD.
+Target environment. Valid values: Dev, QA
+NOTE: Prod is NOT allowed - Prod artifacts come from promotion only.
 
 .PARAMETER Version
-Version string provided by ReleaseConsole (e.g. 1.0.20260125.153045).
+Version string provided by ReleaseConsole (e.g. 1.0.20260201.123045).
 
 .EXAMPLE
-.\Laa-Build.ps1 -Environment DEV -Version 1.0.20260125.153045
+.\Laa-Build.ps1 -Environment Dev -Version 1.0.20260201.123045
+
+.EXAMPLE
+.\Laa-Build.ps1 -Environment QA -Version 1.0.20260201.140530
 #>
 
 [CmdletBinding()]
 param (
     [Parameter(Mandatory)]
-    [ValidateSet("DEV", "QA", "PROD")]
+    [ValidateSet("Dev", "QA", "Prod")]
     [string]$Environment,
 
     [Parameter(Mandatory)]
-    [string]$Version
+    [string]$Version,
+    
+    [Parameter(Mandatory)]
+    [string]$ArtifactsPath
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Log {
-    param ([string] $Message)
+    param ([string]$Message)
     Write-Host "[BUILD][$Environment] $Message"
 }
 
 try {
+    Write-Host "Building LocalAIAssistant for [$Environment], version [$Version]" -ForegroundColor Cyan
 
-    $TargetFramework="net9.0-android"
-
-    Write-Host "🔧 Starting build for environment [$Environment], version [$Version]"
-
+    # Project paths
     $mauiProject = "C:\Users\benho\source\repos\LocalAIAssistant\LocalAIAssistant.Ui.Maui.csproj"
+    $manifestPath = "C:\Users\benho\source\repos\LocalAIAssistant\Platforms\Android\AndroidManifest.xml"
 
+    # $artifactsPath = "C:\CP\Artifacts\Laa\$Version\$Environment"
+    
     if (-not (Test-Path $mauiProject)) {
-        Write-Error "MAUI project not found: $mauiProject"
-        exit 1
+        throw "MAUI project not found: $mauiProject"
     }
 
+    # Configure based on SINGLE environment
     switch ($Environment) {
-        "DEV" {
+        "Dev" {
             $apiBaseUrl = "http://192.168.0.33:5273"
-            $outDir     = "C:\Deploy\CP\MAUI\Dev\"
-            $emoji      = "🟢"
+            $appId = "com.snikpoh.localaiassistant.dev"
+            $appLabel = "Laa (Dev)"
+            $outputDir = "$ArtifactsPath"
         }
         "QA" {
             $apiBaseUrl = "http://192.168.0.33:5274"
-            $outDir     = "C:\Deploy\CP\MAUI\QA\"
-            $emoji      = "🟡"
+            $appId = "com.snikpoh.localaiassistant.qa"
+            $appLabel = "Laa (QA)"
+            $outputDir = "$ArtifactsPath"
         }
-        "PROD" {
+        "Prod" {
             $apiBaseUrl = "http://192.168.0.33:5275"
-            $outDir     = "C:\Deploy\CP\MAUI\Prod\"
-            $emoji      = "🔴"
+            $appId = "com.snikpoh.localaiassistant.prod"
+            $appLabel = "Laa (Prod)"
+            $outputDir = "$ArtifactsPath"
         }
     }
 
-    Write-Host "$emoji Building LocalAIAssistant ($Environment)"
+    Log "Configuration:"
+    Log "  App ID: $appId"
+    Log "  API URL: $apiBaseUrl"
+    Log "  Output: $outputDir"
 
-    Log "Cleaning project"
-    dotnet clean $mauiProject | Out-Host
-    
-    Log "Updating Android manifest label"
-    
-    $manifestPath = "C:\Users\benho\source\repos\LocalAIAssistant\Platforms\Android\AndroidManifest.xml"
+    # Clean previous builds
+    Log "Cleaning project..."
+    dotnet clean $mauiProject | Out-Null
 
+    # Update AndroidManifest.xml
+    Log "Updating Android manifest..."
     [xml]$manifest = Get-Content $manifestPath
-    $manifest.manifest.application.SetAttribute(
-        "android:label",
-        "Laa ($Environment)"
-    )
+    $manifest.manifest.application.SetAttribute("android:label", $appLabel)
     $manifest.Save($manifestPath)
-    
 
-    Log "Publishing MAUI app to $outDir"
-
-    
-    $intermediateOutDir = "C:\Users\benho\source\repos\LocalAIAssistant\bin\Release\net9.0-android\publish"
-    $keystorePath = "$env:USERPROFILE\.android\debug.keystore"
-
-    if (-not (Test-Path $keystorePath)) {
-        Write-Error "Debug keystore not found at $keystorePath. Run 'keytool -genkey -v -keystore debug.keystore ...' to create it."
-        exit 1
+    # Ensure output directory exists
+    if (-not (Test-Path $outputDir)) {
+        New-Item -Path $outputDir -ItemType Directory -Force | Out-Null
     }
+
+    # Build the APK for THIS environment ONLY
+    Log "Publishing MAUI app..."
     
-    Log "Using keystore: $keystorePath"
-   
     dotnet publish $mauiProject `
         -c Release `
         -f net9.0-android `
-        /p:ApplicationLabel="Laa ($Environment)" `
-        /p:ApplicationDisplayVersion=$Version-$Environment `
-        /p:ApiEnvironmentName=$Environment `
-        /p:ApplicationId=com.snikpoh.localaiassistant.$Environment `
-        /p:AppEnvironment=$Environment `
-        /p:ApiBaseUrl=$apiBaseUrl `
+        /p:ApplicationLabel="$appLabel" `
+        /p:ApplicationDisplayVersion="$Version" `
+        /p:ApiEnvironmentName="$Environment" `
+        /p:ApplicationId="$appId" `
+        /p:AppEnvironment="$Environment" `
+        /p:ApiBaseUrl="$apiBaseUrl" `
         /p:AndroidPackageFormat=apk `
         /p:AndroidKeyStore=true `
         /p:AndroidSigningKeyStore="$env:USERPROFILE\.android\debug.keystore" `
         /p:AndroidSigningKeyAlias=androiddebugkey `
         /p:AndroidSigningKeyPass=android `
         /p:AndroidSigningStorePass=android `
-        -o $outDir
+        -o $outputDir
 
-     if ($LASTEXITCODE -ne 0) { 
-         throw "Dotnet publish failed with exit code $LASTEXITCODE. Check for missing Android SDKs or keystore issues." 
-     }
-     
-     $projectDir = Split-Path $mauiProject -Parent
-     $signedApk = Get-ChildItem -Path "$projectDir\bin\Release\net9.0-android\*-Signed.apk" | Select-Object -First 1
-     
-     $keystorePath = "$env:USERPROFILE\.android\debug.keystore"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Dotnet publish failed with exit code $LASTEXITCODE"
+    }
 
-    if (-not (Test-Path $keystorePath)) {
-        Write-Error "Debug keystore not found at $keystorePath. Run 'keytool -genkey -v -keystore debug.keystore ...' to create it."
-        exit 1
+    # Find the signed APK
+    $signedApk = Get-ChildItem "$outputDir\*-Signed.apk" -ErrorAction SilentlyContinue | Select-Object -First 1
+    
+    if (-not $signedApk) {
+        throw "Build appeared to succeed, but no signed APK was found in $outputDir"
+    }
+
+    Log "Signed APK located: $($signedApk.FullName)"
+    
+    # Rename APK to standard format
+    $targetName = "Laa-$Version-$($Environment.ToLower()).apk"
+    $targetPath = Join-Path $outputDir $targetName
+    
+    Log "Renaming APK to: $targetName"
+    Log "Moving APK to: $targetPath"
+    
+    if (Test-Path $targetPath) {
+        Remove-Item $targetPath -Force
     }
     
-    # Copy the signed APK with the expected name
-    $targetApk = Join-Path $outDir "com.snikpoh.localaiassistant.$Environment.apk"
-    Copy-Item -Path $signedApk.FullName -Destination $targetApk -Force
-
-
-    Log "✅ $Environment build complete."
-    Log "    Using keystore: $keystorePath"
-    Log "    APK: $targetApk"
-    Log "    Version: $Version"
+    Move-Item $signedApk.FullName $targetPath -Force
+    
+    Log "Build complete!"
+    Log "  APK: $targetPath"
+    Log "  Version: $Version"
+    Log "  Environment: $Environment"
+    
     exit 0
 }
 catch {
-    Write-Error "Build failed: $($_.Exception.Message)"
-    exit 2
-}
-finally {
-    Pop-Location
+    Write-Host "Build failed: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
 }

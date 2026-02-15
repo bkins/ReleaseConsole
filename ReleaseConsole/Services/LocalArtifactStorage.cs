@@ -1,71 +1,118 @@
 using System.IO.Compression;
 using System.Text.Json;
+using CP.Client.Core.Avails;
+using Microsoft.Extensions.Logging;
 using ReleaseConsole.Core;
+using ReleaseConsole.Services.Interfaces;
 using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole.Services;
 
 public sealed class LocalArtifactStorage : IArtifactStorage
 {
-    private readonly        string                _artifactsRoot;
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private readonly string _artifactsRoot;
 
-    public LocalArtifactStorage(string? artifactsRoot = null)
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    
+    private readonly ILogger<LocalArtifactStorage> _logger;
+    
+    public LocalArtifactStorage(ILogger<LocalArtifactStorage> logger
+                              , string? artifactsRoot = null)
     {
-        _artifactsRoot = artifactsRoot ?? Path.Combine(
-                             System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                             "ReleaseConsole",
-                             "artifacts"
-                         );
+        _logger = logger;
+        _artifactsRoot = artifactsRoot ?? @"C:\CP\Artifacts\";
+                         // Path.Combine(
+                         //     System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
+                         //     "ReleaseConsole",
+                         //     "artifacts"
+                         // );
 
         Directory.CreateDirectory(_artifactsRoot);
     }
 
     public string GetArtifactsRootPath() => _artifactsRoot;
 
-    public async Task<Artifact> SaveArtifactAsync(
-        Component         component,
-        string            version,
-        string            sourcePath,
-        ArtifactMetadata  metadata,
-        CancellationToken ct = default)
+    public async Task<Artifact> SaveArtifactAsync( Component         component
+                                                 , string            version
+                                                 , string            sourcePath
+                                                 , ArtifactMetadata  metadata
+                                                 , CancellationToken ct = default )
     {
-        var artifactDir = GetArtifactDirectory(component, version);
-        Directory.CreateDirectory(artifactDir);
+        var artifactDir = GetArtifactDirectory(component
+                                             , version);
+        Directory.CreateDirectory(artifactDir); // TODO: Redundant?
 
-        var zipPath      = Path.Combine(artifactDir, $"{component.Name}.zip");
-        var metadataPath = Path.Combine(artifactDir, "metadata.json");
-
-        // Create zip from source path
-        if (File.Exists(zipPath))
-            File.Delete(zipPath);
-
-        ZipFile.CreateFromDirectory(sourcePath, zipPath);
+        var tempZipPath = Path.Combine(Path.GetTempPath()
+                                     , $"{component.Name}-{version}-{Guid.NewGuid()}.zip");
+        await ZipFile.CreateFromDirectoryAsync(sourcePath
+                                             , tempZipPath
+                                             , ct);
+        
+        _logger.LogInformation("Moving zip file from {TempZipPath} to {ArtifactDir}"
+                             , tempZipPath
+                             , artifactDir);
+        
+        var finalZipPath = Path.Combine(artifactDir, $"{component.Name}.zip");
+        File.Move(tempZipPath, finalZipPath, overwrite: true);
+        
+        var metadataPath = Path.Combine(artifactDir
+                                      , "metadata.json");
 
         // Save metadata
-        var json = JsonSerializer.Serialize(metadata, JsonOptions);
-        await File.WriteAllTextAsync(metadataPath, json, ct);
+        var json = JsonSerializer.Serialize(metadata
+                                          , JsonOptions);
+        await File.WriteAllTextAsync(metadataPath
+                                   , json
+                                   , ct);
 
-        return new Artifact(component, version, zipPath, metadata);
-    }
-
-    public async Task<Artifact?> GetLatestArtifactAsync(
-        Component         component,
-        Environment       environment,
-        CancellationToken ct = default)
-    {
-        var artifacts = await GetAllArtifactsAsync(component, ct);
+        var finalMetadataPath = Path.Combine(sourcePath, Path.GetFileName(metadataPath));
         
-        return artifacts
-               .Where(a => a.Metadata.BuiltFor == environment)
-               .OrderByDescending(a => a.Metadata.BuildTimestamp)
-               .FirstOrDefault();
+        _logger.LogInformation("Moving metadata file from {MetadataPath} to {FinalMetadataPath}"
+                             , metadataPath
+                             , finalMetadataPath);
+        
+        File.Move(metadataPath, finalMetadataPath);
+
+        return new Artifact(component
+                          , version
+                          , finalZipPath
+                          , metadata);
     }
 
-    public async Task<Artifact?> GetArtifactAsync(
-        Component         component,
-        string            version,
-        CancellationToken ct = default)
+    public async Task<IEnumerable<Artifact>> GetMostRecentArtifactsAsync(Component         component
+                                                                       , Environment       environment
+                                                                       , int               numberOfArtifacts 
+                                                                       , CancellationToken ct = default )
+    {
+        var artifacts = await GetAllArtifactsAsync(component
+                                                 , environment
+                                                 , ct);
+
+        return artifacts.OrderByDescending(artifact => artifact.Metadata.BuildTimestamp)
+                        .Take(numberOfArtifacts);
+    }
+    
+    public async Task<Artifact?> GetLatestArtifactAsync( Component         component
+                                                       , Environment       environment
+                                                       , CancellationToken ct = default )
+    {
+        var artifacts = await GetAllArtifactsAsync(component
+                                                 , environment
+                                                 , ct);
+
+        if (artifacts.Count is 1)
+        {
+            return artifacts[0];
+        }
+        
+        return artifacts.OrderByDescending(artifact => artifact.Metadata.BuildTimestamp)
+                        .FirstOrDefault();
+    }
+
+    public async Task<Artifact?> GetArtifactAsync( Component         component,
+                                                   Environment       environment,
+                                                   string            version,
+                                                   CancellationToken ct = default)
     {
         var artifactDir = GetArtifactDirectory(component, version);
         if (!Directory.Exists(artifactDir))
@@ -81,17 +128,22 @@ public sealed class LocalArtifactStorage : IArtifactStorage
         if (metadata is null)
             return null;
 
-        var zipPath = Path.Combine(artifactDir, $"{component.Name}.zip");
-        return new Artifact(component, version, zipPath, metadata);
+        var zipPath = Path.Combine(artifactDir, $"{component.Name}-{environment}.zip");
+        
+        //check if zip file exists
+        return File.Exists(zipPath).Not()
+                       ? null
+                       : new Artifact(component, version, zipPath, metadata);
+
     }
 
-    public async Task<IReadOnlyList<Artifact>> GetAllArtifactsAsync(
-        Component         component,
-        CancellationToken ct = default)
+    public async Task<List<Artifact>> GetAllArtifactsAsync( Component         component
+                                                      , Environment       environment
+                                                      , CancellationToken ct = default )
     {
         var componentDir = Path.Combine(_artifactsRoot, component.Name);
         if (!Directory.Exists(componentDir))
-            return Array.Empty<Artifact>();
+            return new List<Artifact>(Array.Empty<Artifact>());
 
         var artifacts   = new List<Artifact>();
         var versionDirs = Directory.GetDirectories(componentDir);
@@ -99,11 +151,11 @@ public sealed class LocalArtifactStorage : IArtifactStorage
         foreach (var versionDir in versionDirs)
         {
             var version  = Path.GetFileName(versionDir);
-            var artifact = await GetArtifactAsync(component, version, ct);
+            var artifact = await GetArtifactAsync(component, environment, version, ct);
             if (artifact is not null)
                 artifacts.Add(artifact);
         }
-
+        
         return artifacts;
     }
 

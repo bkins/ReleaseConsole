@@ -4,6 +4,8 @@ public enum ComponentType
 {
     Api
   , Laa
-  , SharedLibrary1
-  , SharedLibrary2
+  , CpClientCore
+  , CpSharedPrimitives
+  , AllNuget
+   , Test
 }

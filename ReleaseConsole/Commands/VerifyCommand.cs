@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using ReleaseConsole.Services;
+using ReleaseConsole.Services.Interfaces;
 
 namespace ReleaseConsole.Commands;
 
@@ -8,6 +9,8 @@ public sealed class VerifyCommand : CommandBaseCommand
     private readonly ReleaseConsole.Core.Environment _environment;
     private readonly HttpClient                      _httpClient;
 
+    private const string HostRoot = "http://localhost";
+    
     public VerifyCommand( ReleaseConsole.Core.Environment environment
                         , IAuditLog                       auditLog
                         , ILogger<VerifyCommand>          logger
@@ -24,9 +27,9 @@ public sealed class VerifyCommand : CommandBaseCommand
 
     protected override ReleaseConsole.Core.Environment? GetEnvironment() => _environment;
 
-    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct)
+    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct, Action<string>? report = null)
     {
-        Logger.LogInformation("Verifying {Environment} environment", _environment);
+        // Logger.LogInformation("Verifying {Environment} environment", _environment);
 
         var checks = new List<(string Name, bool Success, string Details)>();
 
@@ -34,9 +37,9 @@ public sealed class VerifyCommand : CommandBaseCommand
         var (httpSuccess, httpDetails) = await PerformHttpHealthCheckAsync(ct);
         checks.Add(("HTTP Health Check", httpSuccess, httpDetails));
 
-        // File Existence Check
-        var (fileSuccess, fileDetails) = PerformFileExistenceCheck();
-        checks.Add(("File Existence Check", fileSuccess, fileDetails));
+        // File Existence Check  -- Disabled for now
+        // var (fileSuccess, fileDetails) = PerformFileExistenceCheck();
+        // checks.Add(("File Existence Check", fileSuccess, fileDetails));
 
         // Database Connectivity (placeholder)
         var (dbSuccess, dbDetails) = await PerformDatabaseCheckAsync(ct);
@@ -61,7 +64,7 @@ public sealed class VerifyCommand : CommandBaseCommand
 
         try
         {
-            Logger.LogInformation("Checking health endpoint: {Endpoint}", endpoint);
+            // Logger.LogInformation("Checking health endpoint: {Endpoint}", endpoint);
             var response = await _httpClient.GetAsync(endpoint, ct);
             
             return response.IsSuccessStatusCode
@@ -98,27 +101,31 @@ public sealed class VerifyCommand : CommandBaseCommand
 
     private string? GetHealthEndpoint() => _environment switch
     {
-            ReleaseConsole.Core.Environment.Dev  => "http://localhost:5000/health",
-            ReleaseConsole.Core.Environment.Qa   => "http://qa-server/api/health",
-            ReleaseConsole.Core.Environment.Prod => "https://prod-server/api/health",
+            ReleaseConsole.Core.Environment.Dev  => $"{HostRoot}:5273/health/ready",
+            ReleaseConsole.Core.Environment.Qa   => $"{HostRoot}:5274/health/ready",
+            ReleaseConsole.Core.Environment.Prod => $"{HostRoot}:5275/health/ready",
             _                                    => null
     };
 
-    private string? GetExpectedDeploymentPath() => _environment switch
+    private string? GetExpectedDeploymentPath()
     {
-            ReleaseConsole.Core.Environment.Dev  => Path.Combine(System.Environment.CurrentDirectory, "publish"),
-            ReleaseConsole.Core.Environment.Qa   => @"\\qa-server\deployments",
-            ReleaseConsole.Core.Environment.Prod => @"\\prod-server\deployments",
-            _                                    => null
-    };
+        throw new NotImplementedException("GetExpectedDeploymentPath is not implemented yet. Need to define the correct deployment paths.");
+        return _environment switch
+        {
+                Core.Environment.Dev => Path.Combine(Environment.CurrentDirectory
+                                                                  , "publish")
+              , Core.Environment.Qa => @"\\qa-server\deployments"
+              , Core.Environment.Prod => @"\\prod-server\deployments", _ => null
+        };
+    }
 
-    private static string BuildResultMessage(List<(string Name, bool Success, string Details)> checks)
+    private string BuildResultMessage(List<(string Name, bool Success, string Details)> checks)
     {
-        var lines = new List<string> { "Verification Results:" };
+        var lines = new List<string> { $"Verification Results: {_environment}" };
         foreach (var (name, success, details) in checks)
         {
-            var status = success ? "✓" : "✗";
-            lines.Add($"  {status} {name}: {details}");
+            var status = success ? "✅" : "⛔";
+            lines.Add($"  {status}  {name}: {details}");
         }
         return string.Join(System.Environment.NewLine, lines);
     }

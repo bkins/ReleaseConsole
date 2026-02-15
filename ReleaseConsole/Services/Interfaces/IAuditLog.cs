@@ -1,5 +1,7 @@
 using ReleaseConsole.Core;
 
+namespace ReleaseConsole.Services.Interfaces;
+
 public interface IAuditLog
 {
     Task                            LogAsync(AuditEntry       entry,      CancellationToken ct = default);

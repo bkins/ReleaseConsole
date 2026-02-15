@@ -5,4 +5,6 @@ public enum Environment
     Dev
   , Qa
   , Prod
+  , All
+  , Test
 }

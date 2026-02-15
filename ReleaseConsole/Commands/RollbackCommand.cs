@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using ReleaseConsole.Core;
 using ReleaseConsole.Services;
+using ReleaseConsole.Services.Interfaces;
 using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole.Commands;
@@ -36,15 +37,13 @@ public sealed class RollbackCommand : CommandBaseCommand
     protected override string      GetComponentName() => _component.Name;
     protected override Environment? GetEnvironment()   => Environment.Prod;
 
-    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct)
+    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct, Action<string>? report = null)
     {
-        Logger.LogWarning(
-            "PRODUCTION ROLLBACK\n"    +
-            "Component: {Component}\n" +
-            "Target Version: {Version}",
-            _component.Name,
-            _targetVersion
-        );
+        Logger.LogWarning("PRODUCTION ROLLBACK\n" 
+                        + "Component: {Component}\n" 
+                        + "Target Version: {Version}"
+                        , _component.Name
+                        , _targetVersion);
 
         Console.Write("Proceed with PRODUCTION ROLLBACK? Type 'ROLLBACK' to confirm: ");
         var response = Console.ReadLine()?.Trim();
@@ -55,7 +54,7 @@ public sealed class RollbackCommand : CommandBaseCommand
         }
 
         // Get target artifact
-        var artifact = await _artifactStorage.GetArtifactAsync(_component, _targetVersion, ct);
+        var artifact = await _artifactStorage.GetArtifactAsync(_component, Environment.Prod, _targetVersion, ct);
         if (artifact is null)
         {
             return CommandResult.Fail($"Version {_targetVersion} not found for {_component.Name}");
@@ -87,7 +86,7 @@ public sealed class RollbackCommand : CommandBaseCommand
                              };
 
             Logger.LogInformation("Executing rollback deployment: {ScriptPath}", scriptPath);
-            var psResult = await _psExecutor.ExecuteScriptAsync(scriptPath, parameters, ct);
+            var psResult = await _psExecutor.ExecuteScriptAsync(scriptPath, _component.Type, parameters, ct);
 
             if (!psResult.Success)
             {
