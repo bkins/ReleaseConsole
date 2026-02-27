@@ -1,264 +1,124 @@
 ﻿<#
 .SYNOPSIS
-Deploys the CognitivePlatform API to the local deployment directory.
+Deploys the CognitivePlatform API to a specific environment.
 
 .DESCRIPTION
-Deploys the API binaries to C:\CP\Deploy\Api\{Environment}, creating a backup
-of the current deployment and preserving the Data folder for database files.
+Copies the universal API artifact to the target environment directory
+and configures environment-specific settings.
 
 .PARAMETER Environment
-Target environment. Valid values: Dev, Qa, Prod.
+Target environment: DEV, QA, or PROD
 
 .PARAMETER SourcePath
-Path to the extracted artifact directory containing the API binaries.
+Path to the extracted artifact (provided by ReleaseConsole)
 
 .PARAMETER Version
-Version string of the artifact being deployed.
-
-.PARAMETER Component
-Component name (should be "API").
-
-.PARAMETER CurrentVersion
-Optional. Version string of the currently deployed API (for logging and backup naming).
-
-.EXAMPLE
-.\API-Deploy.ps1 -Environment Dev -SourcePath "C:\temp\api-deploy" -Version 1.0.2224.901 -Component API
-
-.EXAMPLE
-.\API-Deploy.ps1 -Environment Qa -SourcePath "C:\temp\api-deploy" -Version 1.0.2224.905 -Component API -CurrentVersion 1.0.2224.901
+Version being deployed (for logging)
 #>
 
-# [CmdletBinding()]
+[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("Dev", "Qa", "Prod")]
+    [ValidateSet("DEV", "QA", "PROD")]
     [string]$Environment,
     
     [Parameter(Mandatory)]
     [string]$SourcePath,
     
     [Parameter(Mandatory)]
-    [string]$Version,
-    
-    [Parameter(Mandatory)]
-    [string]$Component,
-    
-    [Parameter()]
-    [string]$CurrentVersion
+    [string]$Version
 )
-
-[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# ============================================================================
-# Configuration
-# ============================================================================
+Write-Host "========================================"
+Write-Host "Deploying CognitivePlatform API"
+Write-Host "========================================"
+Write-Host "Environment: $Environment"
+Write-Host "Version:     $Version"
+Write-Host "Source:      $SourcePath"
+Write-Host ""
 
-$deployRoot = "C:\CP\Deploy\Api"
-$deployPath = Join-Path $deployRoot $Environment
-$backupRoot = Join-Path $deployPath "backups"
-$dataFolder = Join-Path $deployPath "Data"
-
-Write-Output "========================================"
-Write-Output "Deploying CognitivePlatform API"
-Write-Output "========================================"
-Write-Output "Environment:       $Environment"
-Write-Output "Version:           $Version"
-Write-Output "Source:            $SourcePath"
-Write-Output "Destination:       $deployPath"
-
-if ($CurrentVersion) {
-    Write-Output "Current Version:   $CurrentVersion"
+# Environment-specific configuration
+switch ($Environment) {
+    "DEV" {
+        $deployPath = "C:\CP\Deploy\API\Dev"
+        $port = "5273"
+        $aspnetEnv = "Development"
+        $urls = "https://localhost:7083;http://localhost:5273;http://192.168.0.33:5273"
+    }
+    "QA" {
+        $deployPath = "C:\CP\Deploy\API\QA"
+        $port = "5274"
+        $aspnetEnv = "QA"
+        $urls = "https://localhost:7084;http://localhost:5274;http://192.168.0.33:5274"
+    }
+    "PROD" {
+        $deployPath = "C:\CP\Deploy\API\Prod"
+        $port = "5275"
+        $aspnetEnv = "Prod"
+        $urls = "https://localhost:7085;http://localhost:5275;http://192.168.0.33:5275"
+    }
 }
 
-Write-Output ""
+Write-Host "Target: $deployPath"
+Write-Host ""
 
-# ============================================================================
-# Validation
-# ============================================================================
+# Stop any running instance (if running as service/process)
+# TODO: Add your service stop logic here if needed
 
-Write-Output "Validating source files..."
-
-if (-not (Test-Path $SourcePath)) {
-    Write-Output "========================================" -ForegroundColor Red
-    Write-Output "ERROR: Source path not found" -ForegroundColor Red
-    Write-Output "========================================" -ForegroundColor Red
-    Write-Output "Path: $SourcePath" -ForegroundColor Yellow
-    exit 1
-}
-
-$sourceFiles = Get-ChildItem -Path $SourcePath -File
-if ($sourceFiles.Count -eq 0) {
-    Write-Output "========================================" -ForegroundColor Red
-    Write-Output "ERROR: Source directory is empty" -ForegroundColor Red
-    Write-Output "========================================" -ForegroundColor Red
-    Write-Output "Path: $SourcePath" -ForegroundColor Yellow
-    exit 1
-}
-
-Write-Output "  Source files: $($sourceFiles.Count)"
-
-# Check for expected executable
-$expectedExe = "CognitivePlatform.Api.$Environment.exe"
-$exePath = Join-Path $SourcePath $expectedExe
-
-if (-not (Test-Path $exePath)) {
-    Write-Output "========================================" -ForegroundColor Yellow
-    Write-Output "WARNING: Expected executable not found" -ForegroundColor Yellow
-    Write-Output "========================================" -ForegroundColor Yellow
-    Write-Output "Expected: $expectedExe" -ForegroundColor Yellow
-    Write-Output "Continuing anyway..." -ForegroundColor Gray
-    Write-Output ""
-}
-
-# ============================================================================
-# Backup Current Deployment
-# ============================================================================
-
+# Backup existing deployment
 if (Test-Path $deployPath) {
-    Write-Output "Creating backup of current deployment..."
-    
-    # Create backup directory structure
-    New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null
-    
-    # Generate backup folder name with timestamp
-    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    $backupName = if ($CurrentVersion) {
-        "v$CurrentVersion-$timestamp"
-    } else {
-        "backup-$timestamp"
-    }
-    
-    $backupPath = Join-Path $backupRoot $backupName
-    
-    # Copy current deployment to backup (excluding Data folder and existing backups)
-    Write-Output "  Backup location: $backupPath"
-    
-    New-Item -ItemType Directory -Force -Path $backupPath | Out-Null
-    
-    Get-ChildItem -Path $deployPath -Exclude "Data", "backups" | ForEach-Object {
-        Copy-Item -Path $_.FullName -Destination $backupPath -Recurse -Force
-    }
-    
-    $backupFileCount = (Get-ChildItem -Path $backupPath -Recurse -File).Count
-    Write-Output "  ✅ Backed up $backupFileCount files to: $backupName"
-    Write-Output ""
-    
-    # Optional: Clean up old backups (keep last 10)
-    $allBackups = Get-ChildItem -Path $backupRoot -Directory | Sort-Object Name -Descending
-    if ($allBackups.Count -gt 10) {
-        Write-Output "Cleaning up old backups (keeping last 10)..."
-        $backupsToDelete = $allBackups | Select-Object -Skip 10
-        foreach ($oldBackup in $backupsToDelete) {
-            Write-Output "  Removing: $($oldBackup.Name)"
-            Remove-Item -Path $oldBackup.FullName -Recurse -Force
-        }
-        Write-Output ""
-    }
-} else {
-    Write-Output "No existing deployment found (first-time deployment)"
-    Write-Output ""
+    $backupPath = "$deployPath.backup.$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+    Write-Host "Creating backup: $backupPath"
+    Copy-Item -Path $deployPath -Destination $backupPath -Recurse -Force
 }
 
-# ============================================================================
-# Preserve Data Folder
-# ============================================================================
+# Create deployment directory
+New-Item -ItemType Directory -Path $deployPath -Force | Out-Null
 
-$dataBackupPath = $null
-$hasDataFolder = Test-Path $dataFolder
-
-if ($hasDataFolder) {
-    Write-Output "Preserving Data folder..."
-    
-    # Temporarily move Data folder out of the way
-    $dataBackupPath = Join-Path $env:TEMP "CP-Deploy-Data-$Environment-$(Get-Date -Format 'yyyyMMddHHmmss')"
-    Move-Item -Path $dataFolder -Destination $dataBackupPath -Force
-    
-    Write-Output "  ✅ Data folder preserved temporarily"
-    Write-Output ""
-}
-
-# ============================================================================
-# Deploy New Version
-# ============================================================================
-
-Write-Output "Deploying new version..."
-
-# Create deployment directory if it doesn't exist
-New-Item -ItemType Directory -Force -Path $deployPath | Out-Null
-
-# Remove old files (but keep backups folder)
-if (Test-Path $deployPath) {
-    Get-ChildItem -Path $deployPath -Exclude "backups", "Data" | Remove-Item -Recurse -Force
-}
-
-# Copy new files
-Write-Output "  Copying files from source..."
+# Copy artifact
+Write-Host "Copying artifact files..."
 Copy-Item -Path "$SourcePath\*" -Destination $deployPath -Recurse -Force
 
-$deployedFileCount = (Get-ChildItem -Path $deployPath -File).Count
-Write-Output "  ✅ Deployed $deployedFileCount files"
-Write-Output ""
+# Create environment configuration file
+Write-Host "Creating environment configuration..."
+$envConfig = @{
+    ASPNETCORE_ENVIRONMENT = $aspnetEnv
+    ASPNETCORE_URLS = $urls
+} | ConvertTo-Json
 
-# ============================================================================
-# Restore Data Folder
-# ============================================================================
+Set-Content -Path "$deployPath\environment.json" -Value $envConfig -Encoding UTF8
 
-if ($dataBackupPath -and (Test-Path $dataBackupPath)) {
-    Write-Output "Restoring Data folder..."
-    
-    Move-Item -Path $dataBackupPath -Destination $dataFolder -Force
-    
-    Write-Output "  ✅ Data folder restored"
-    Write-Output ""
-}
+# Create startup batch file
+# Create startup script
+Write-Host "Creating startup script..."
+@"
+`$host.UI.RawUI.WindowTitle = "CognitivePlatform API ($Environment)"
 
-# ============================================================================
-# Verification
-# ============================================================================
+Write-Host "Starting CognitivePlatform API ($Environment)"
+Write-Host "Version: $Version"
+Write-Host ""
 
-Write-Output "Verifying deployment..."
+`$env:ASPNETCORE_ENVIRONMENT = "$aspnetEnv"
+`$env:ASPNETCORE_URLS        = "$urls"
 
-$deployedExe = Join-Path $deployPath $expectedExe
-if (Test-Path $deployedExe) {
-    Write-Output "  ✅ Executable found: $expectedExe"
-} else {
-    Write-Output "  ⚠️  Expected executable not found: $expectedExe" -ForegroundColor Yellow
-}
+.\CognitivePlatform.Api.exe
+"@ | Out-File "$deployPath\start-api.ps1" -Encoding UTF8
 
-# Check for config files
-$configFiles = Get-ChildItem -Path $deployPath -Filter "appsettings*.json"
-Write-Output "  Configuration files: $($configFiles.Count)"
-foreach ($config in $configFiles) {
-    Write-Output "    - $($config.Name)"
-}
+# Start the service/process
+# TODO: Add your service start logic here if needed
 
-# ============================================================================
-# Success
-# ============================================================================
-
-Write-Output ""
-Write-Output "========================================"
-Write-Output "✅ Deployment Successful"
-Write-Output "========================================"
-Write-Output "Deployed: CognitivePlatform API v$Version ($Environment)"
-Write-Output "Location: $deployPath"
-Write-Output ""
-
-if ($hasDataFolder) {
-    Write-Output "⚠️  IMPORTANT: Data folder was preserved" -ForegroundColor Yellow
-    Write-Output "   Database files were NOT modified during deployment" -ForegroundColor Yellow
-    Write-Output "   If you need to run migrations, do so manually." -ForegroundColor Yellow
-    Write-Output ""
-}
-
-Write-Output "Next steps:" -ForegroundColor Cyan
-Write-Output "  1. Verify configuration in appsettings.$Environment.json"
-Write-Output "  2. Start the API manually from: $deployPath"
-Write-Output "  3. Check that the API is responding correctly"
-Write-Output ""
+Write-Host ""
+Write-Host "========================================"
+Write-Host "Deployment Successful"
+Write-Host "========================================"
+Write-Host "Deployed: CognitivePlatform API v$Version"
+Write-Host "Environment: $Environment"
+Write-Host "Location: $deployPath"
+Write-Host ""
+Write-Host "To start manually: $deployPath\start-api.ps1"
+Write-Host ""
 
 exit 0

@@ -16,7 +16,7 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
     }
 
     public async Task<PowerShellResult> ExecuteScriptAsync( string                      scriptPath
-                                                          , ComponentType               component
+                                                          , ComponentType?              component
                                                           , Dictionary<string, string>? parameters = null
                                                           , CancellationToken           ct         = default )
     {
@@ -49,11 +49,6 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
                     throw new InvalidOperationException($"Script contract violation: a parameter missing for {scriptPath}");
                 }
 
-                foreach (var (key, value) in parameters)
-                {
-                    args.Append($" -{key} \"{value}\"");
-                }
-
                 arguments = args.ToString();
                 break;
             }
@@ -61,7 +56,7 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
 
         var startInfo = new ProcessStartInfo
                         {
-                                FileName               = "pwsh"
+                                FileName               = @"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
                               , Arguments              = arguments
                               , RedirectStandardOutput = true
                               , RedirectStandardError  = true
@@ -71,9 +66,9 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
                               , StandardErrorEncoding  = Encoding.UTF8
                         };
 
-        var output = new StringBuilder();
+        var output = new StringBuilder(startInfo.Arguments);
         var error  = new StringBuilder();
-
+        
         using var process = new Process { StartInfo = startInfo };
 
         process.OutputDataReceived += ( _
@@ -90,8 +85,7 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
             Console.ResetColor();
         };
 
-        process.ErrorDataReceived += ( _
-                                     , eventArgs ) =>
+        process.ErrorDataReceived += ( _, eventArgs ) =>
         {
             if (eventArgs.Data == null) return;
             error.AppendLine(eventArgs.Data);

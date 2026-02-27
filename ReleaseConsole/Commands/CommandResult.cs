@@ -1,6 +1,6 @@
 namespace ReleaseConsole.Services;
 
-public sealed record CommandResult( bool    Success
+public class CommandResult( bool    Success
                                   , string  Message
                                   , string? ErrorDetails = null
 )
@@ -12,4 +12,17 @@ public sealed record CommandResult( bool    Success
                                     , string? details = null ) => new(false
                                                                     , message
                                                                     , details);
+
+    public bool    Success      { get; init; } = Success;
+    public string  Message      { get; set; } = Message;
+    public string? ErrorDetails { get; init; } = ErrorDetails;
+
+    public void Deconstruct( out bool    Success
+                          , out  string  Message
+                          , out  string? ErrorDetails )
+    {
+        Success      = this.Success;
+        Message      = this.Message;
+        ErrorDetails = this.ErrorDetails;
+    }
 }

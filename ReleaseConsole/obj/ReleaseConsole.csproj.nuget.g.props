@@ -14,57 +14,57 @@
     <SourceRoot Include="C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
   </ItemGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\API-Client-Library_Flow.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\API-Client-Library_Flow.md')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\API-Client-Library_Flow.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\API-Client-Library_Flow.md')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>
       <Link>API-Client-Library_Flow.md</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CP.Client.Core - Folder Structure.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CP.Client.Core - Folder Structure.md')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CP.Client.Core - Folder Structure.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CP.Client.Core - Folder Structure.md')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>
       <Link>CP.Client.Core - Folder Structure.md</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CP.Client.Core - litmus Test.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CP.Client.Core - litmus Test.md')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CP.Client.Core - litmus Test.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CP.Client.Core - litmus Test.md')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>
       <Link>CP.Client.Core - litmus Test.md</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CP.Client.Core.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CP.Client.Core.md')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CP.Client.Core.md" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CP.Client.Core.md')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>
       <Link>CP.Client.Core.md</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CompleteCleanAndRebuild.ps1" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\CompleteCleanAndRebuild.ps1')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CompleteCleanAndRebuild.ps1" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\CompleteCleanAndRebuild.ps1')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>
       <Link>CompleteCleanAndRebuild.ps1</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\FilesAndFolders.ps1" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\FilesAndFolders.ps1')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\FilesAndFolders.ps1" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\FilesAndFolders.ps1')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>
       <Link>FilesAndFolders.ps1</Link>
     </Content>
-    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\publish-local-nuget.ps1" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.12\contentFiles\any\netstandard2.1\publish-local-nuget.ps1')">
+    <Content Include="$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\publish-local-nuget.ps1" Condition="Exists('$(NuGetPackageRoot)cp.client.core\0.1.44\contentFiles\any\netstandard2.1\publish-local-nuget.ps1')">
       <NuGetPackageId>CP.Client.Core</NuGetPackageId>
-      <NuGetPackageVersion>0.1.12</NuGetPackageVersion>
+      <NuGetPackageVersion>0.1.44</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>

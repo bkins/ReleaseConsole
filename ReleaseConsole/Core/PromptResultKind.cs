@@ -2,7 +2,7 @@ namespace ReleaseConsole.Core;
 
 public enum PromptResultKind
 {
-    Success
+    Selected
   , Back
   , Cancel
 }

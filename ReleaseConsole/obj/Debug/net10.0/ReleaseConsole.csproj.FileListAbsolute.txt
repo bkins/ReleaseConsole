@@ -8,6 +8,7 @@ C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Rele
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\ReleaseConsole.runtimeconfig.json
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\ReleaseConsole.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\ReleaseConsole.pdb
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Castle.Core.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\CP.Client.Core.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\CP.Shared.Primitives.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\FluentAssertions.dll
@@ -23,8 +24,10 @@ C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Micr
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Microsoft.Extensions.Options.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Microsoft.Extensions.Options.ConfigurationExtensions.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Microsoft.Extensions.Primitives.dll
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Moq.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Spectre.Console.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\System.CommandLine.dll
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\System.Diagnostics.EventLog.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\xunit.abstractions.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\xunit.assert.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\xunit.core.dll
@@ -42,6 +45,8 @@ C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\ru\S
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\tr\System.CommandLine.resources.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\zh-Hans\System.CommandLine.resources.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\zh-Hant\System.CommandLine.resources.dll
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.Messages.dll
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.dll
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\ReleaseConsole.csproj.AssemblyReference.cache
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\ReleaseConsole.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\ReleaseConsole.AssemblyInfoInputs.cache
@@ -54,8 +59,3 @@ C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\refi
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\ReleaseConsole.pdb
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\ReleaseConsole.genruntimeconfig.cache
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\obj\Debug\net10.0\ref\ReleaseConsole.dll
-C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Castle.Core.dll
-C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Moq.dll
-C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\System.Diagnostics.EventLog.dll
-C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.Messages.dll
-C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\runtimes\win\lib\net6.0\System.Diagnostics.EventLog.dll

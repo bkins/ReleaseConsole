@@ -8,10 +8,12 @@ using ReleaseConsole.Core;
 using ReleaseConsole.Services;
 using Spectre.Console;
 using System.CommandLine;
+using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using CP.Client.Core.Avails;
+using CP.Client.Core.Common.ConectivityToApi;
 using ReleaseConsole.Core.Spinners;
+using ReleaseConsole.Menu;
 using ReleaseConsole.Services.Interfaces;
 using Environment = ReleaseConsole.Core.Environment;
 
@@ -19,15 +21,15 @@ namespace ReleaseConsole;
 
 public class Program
 {
-    private static string?          _version;
     private static ServiceProvider? _serviceProvider;
+
+    private const string ScriptFolder = @"C:\CP\Deploy\Api\";
+    private const string ScriptFileName = "start-api.bat";
 
     public static async Task<int> Main( string[] args )
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
-       
-        // await ShowAllSpinnersAsync();
-        
+
         var services = ConfigureServices();
         _serviceProvider = services.BuildServiceProvider();
 
@@ -39,52 +41,30 @@ public class Program
 
         // Otherwise use System.CommandLine
         var rootCommand = BuildRootCommand(_serviceProvider);
+        
         return await rootCommand.InvokeAsync(args);
     }
 
-    private static PromptResult<T> PromptOrBack<T>( string           message
-                                   , Func<string, T?> parser
-                                   , bool             required = true )
+    private sealed record PromptOption<T>( string Label
+                                         , T      Value
+                                         , bool   IsBack = false );
+
+    private static PromptResult<T> PromptOrBack<T>( string                       title
+                                                  , IEnumerable<PromptOption<T>> options )
     {
-        AnsiConsole.MarkupLine($"{message} ([grey]type 'back' to go back[/])");
+        var backOption = new PromptOption<T>(MenuText.Navigation.Back, default!, true);
 
-        var input = AnsiConsole.Prompt(new TextPrompt<string>("> ").AllowEmpty()).Trim();
+        var allOptions = options.Append(backOption).ToList();
+        var prompt = new SelectionPrompt<PromptOption<T>>().Title(title)
+                                                           .UseConverter(o => o.Label)
+                                                           .AddChoices(allOptions);
+        var selected = AnsiConsole.Prompt(prompt);
 
-        if (input.Equals("back"
-                       , StringComparison.OrdinalIgnoreCase))
-            return new PromptResult<T>(PromptResultKind.Back);
+        return selected.IsBack
+                       ? PromptResult<T>.Back()
+                       : PromptResult<T>.Selected(selected.Value);
 
-        if (required.Not()
-         && input.HasNoValue())
-            return new PromptResult<T>(PromptResultKind.Cancel);
 
-        var parsed = parser(input);
-        if (parsed is not null)
-            return new PromptResult<T>(PromptResultKind.Success
-                                     , parsed);
-        
-        AnsiConsole.MarkupLine("[red]Invalid input.[/]");
-        
-        return PromptOrBack(message, parser, required);
-    }
-
-    private static PromptResult<T> PromptOrBack<T>( string                 message
-                                                  , IDictionary<string, T> options )
-    {
-        
-        
-        var choices = options.Keys
-                             .Append("⬅️ Back")
-                             .ToArray();
-
-        var selection = AnsiConsole.Prompt(new SelectionPrompt<string>().Title(message)
-                                                                        .AddChoices(choices));
-
-        if (selection == "⬅️ Back")
-            return new PromptResult<T>(PromptResultKind.Back);
-
-        return new PromptResult<T>(PromptResultKind.Success
-                                 , options[selection]);
     }
 
 
@@ -104,181 +84,214 @@ public class Program
 
     public static async Task<T> RunWithSpinnerAsync<T>( string                        message
                                                       , Func<Action<string>, Task<T>> action
-                                                      , Color?                        color = null )
+                                                      , Color?                        color = null 
+        , string messageSuffix = "" )
     {
+        var suffix = messageSuffix.HasValue() ? $" - {messageSuffix}" : message;
+        
         return await AnsiConsole.Status()
                                 .Spinner(new CaseSwappingSpinner(message))
                                 .SpinnerStyle(color ?? Color.White)
-                                .StartAsync(message
+                                .StartAsync(suffix
                                           , async ctx =>
                                             {
-                                                void Report( string text ) => ctx.Status(text);
+                                                void Report( string text) => ctx.Status(text);
                                                 return await action(Report);
                                             });
     }
 
-    public static async Task ShowAllSpinnersAsync()
-    {
-        // 1. Get the "Known" spinners via Reflection
-        var knownSpinners = typeof(Spinner.Known)
-                            .GetProperties(BindingFlags.Public | BindingFlags.Static)
-                            .Where(p => p.PropertyType == typeof(Spinner))
-                            .Select(p => new { Name = p.Name, Spinner = (Spinner)p.GetValue(null)! });
-
-        // 2. Create your custom spinner instance
-        var custom = new { Name = "CustomCaseSwapper", Spinner = (Spinner)new CaseSwappingSpinner("Thinking") };
-
-        // 3. Combine them (Custom first, then Known)
-        var allSpinners = new[] { custom }.Concat(knownSpinners);
-
-        foreach (var item in allSpinners)
-        {
-            await AnsiConsole.Status()
-                             .Spinner(item.Spinner)
-                             .SpinnerStyle(Style.Parse("cyan"))
-                             .StartAsync($"Spinner: {item.Name.EscapeMarkup()}", async _ =>
-                             {
-                                 await Task.Delay(20000); 
-                             });
-        }
-
-        AnsiConsole.MarkupLine("\n[grey]Done previewing spinners. Press any key…[/]");
-        Console.ReadKey();
-    }
-    
+   /// <summary>
+   /// Menu → PromptForX → TrySelect → Execute → DisplayResult → Pause
+   /// </summary>
+   /// <returns></returns>
     private static async Task<int> RunSpectreMenuAsync()
     {
         while (true)
         {
             AnsiConsole.Clear();
 
-            // Draw fancy header with ASCII-safe figlet
-            var header = new FigletText("Release Console").LeftJustified()
-                                                          .Color(Color.Cyan1);
+            var header = new FigletText(MenuText.Header.Title).LeftJustified()
+                                                              .Color(Color.Cyan1);
+
             AnsiConsole.Write(header);
+            AnsiConsole.MarkupLine(MenuText.Header.Subtitle + "\n");
 
-            AnsiConsole.MarkupLine("[dim]Deliberate. Audited. Safe.[/]\n");
+            var menu = new ConsoleMenu
+                       {
+                               Title = MenuText.MainMenuTitle
+                             , Hint  = MenuText.Navigation.MoreChoicesHint
+                       }
+                       .Add(MenuText.Commands.BuildComponent.Label
+                          , HandleBuildAsync)
+                       .Add(MenuText.Commands.DeployComponent.Label
+                          , HandleDeployAsync)
+                       .Add(MenuText.Commands.VerifyEnvironment.Label
+                          , HandleVerifyAsync)
+                       .Add(MenuText.Commands.ViewAuditLogs.Label
+                          , HandleViewAuditLogsAsync)
+                       .Add(MenuText.Commands.ListArtifacts.Label
+                          , HandleListArtifactsAsync)
+                       .Add(MenuText.Commands.LaunchScalar.Label
+                            , HandleLaunchScalar)
+                       .AddExit(MenuText.Navigation.Exit);
 
-            const string buildComponent      = "🔨 Build Component";
-            const string deployComponent     = "🚀 Deploy Component";
-            const string promoteToProduction = "⬆️ Promote to Production";
-            const string verifyEnvironment   = "✅  Verify Environment";
-            const string rollbackProduction  = "↩️ Rollback Production";
-            const string viewAuditLogs       = "📋 View Audit Logs";
-            const string listArtifacts       = "📦 List Artifacts";
-            
-            // const string fixAuditLogs        = "🛠️ Fix Audit Logs";
-            const string exit                = "❌  Exit";
+            var result = await menu.ShowAsync();
 
-            // Create menu with ASCII symbols instead of emojis
-            var choice = AnsiConsole.Prompt(new SelectionPrompt<string>().Title("[cyan]What would you like to do?[/]")
-                                                                         .PageSize(10)
-                                                                         .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
-                                                                         .AddChoices(buildComponent
-                                                                                   , deployComponent
-                                                                                   , promoteToProduction
-                                                                                   , verifyEnvironment
-                                                                                   , rollbackProduction
-                                                                                   , viewAuditLogs
-                                                                                   , listArtifacts
-                                                                                   // , fixAuditLogs
-                                                                                   , exit));
+            if (result != MenuResult.Exit) continue;
 
-            try
-            {
-                switch (choice)
-                {
-                    case buildComponent:
-                        await HandleBuildAsync();
-                        break;
-                    case deployComponent:
-                        await HandleDeployAsync();
-                        break;
-                    case promoteToProduction:
-                        await HandlePromoteAsync();
-                        break;
-                    case verifyEnvironment:
-                        await HandleVerifyAsync();
-                        break;
-                    case rollbackProduction:
-                        await HandleRollbackAsync();
-                        break;
-                    case viewAuditLogs:
-                        await HandleViewAuditLogsAsync();
-                        break;
-                    case listArtifacts:
-                        await HandleListArtifactsAsync();
-                        break;
-                    // case fixAuditLogs:
-                    //     FileAuditLog.FixAuditLog();
-                    //     break;
-                    case exit:
-                        AnsiConsole.MarkupLine("\n[cyan]Goodbye![/]");
-                        return 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"\n[red]⛔  ERROR: {ex.Message.EscapeMarkup()}[/]");
-                AnsiConsole.MarkupLine($"[grey]{ex.StackTrace?.EscapeMarkup()}[/]");
-                AnsiConsole.WriteLine();
-                AnsiConsole.Markup("[grey]Press any key to continue...[/]");
-                Console.ReadKey(true);
-            }
+            AnsiConsole.MarkupLine(MenuText.Navigation.Goodby);
+
+            return 0;
         }
     }
 
+    private static async Task HandleLaunchScalar()
+    {
+        var panel = new Panel(MenuText.Commands
+                                      .LaunchScalar
+                                      .PanelTitle).BorderColor(MenuText.Commands
+                                                                       .LaunchScalar
+                                                                       .Color);
+        AnsiConsole.Write(panel);
+        AnsiConsole.WriteLine();
+
+        if (TrySelect(PromptForEnvironment()
+                    , out var environment).Not())
+            return;
+        
+        AnsiConsole.MarkupLine($"[green]Launching Scalar in {environment}...[/]");
+        
+        StartApi(environment);
+        await WaitForApiReady(environment);
+        
+        OpenScalar(environment);
+
+        PauseForUser();
+    }
+
+    // private static async Task StartApi(string scriptPath)
+    // {
+    //     var psi = new ProcessStartInfo
+    //               {
+    //                       FileName = "cmd.exe"
+    //                     , Arguments = @$"/c start "" {scriptPath}\start-api.bat"
+    //                     , CreateNoWindow = true
+    //                     , UseShellExecute = false
+    //                       //   FileName               = "cmd.exe"
+    //                       // , Arguments              = $"/c \"{scriptPath}\\start-api.bat\""
+    //                       // , WorkingDirectory       = scriptPath
+    //                       // , RedirectStandardOutput = true
+    //                       // , RedirectStandardError  = true
+    //                       // , UseShellExecute        = false
+    //                       // , CreateNoWindow         = true
+    //               };
+    //
+    //     using var process = Process.Start(psi);
+    //     
+    //     // var output = await process!.StandardOutput.ReadToEndAsync();
+    //     // var error  = await process.StandardError.ReadToEndAsync();
+    //     // var result = new CommandResult(error.HasNoValue()
+    //     //                              , output
+    //     //                              , error);
+    //     // DisplayResult(result);
+    //     
+    //     //await process.WaitForExitAsync();
+    // }
+    
+    private static void StartApi( Environment environment )
+    {
+        var scriptFolderPath = $@"{ScriptFolder}{environment}";
+        
+        var completeScriptPath = Path.Combine(scriptFolderPath
+                                         , ScriptFileName);
+        if (File.Exists(completeScriptPath)
+                .Not())
+        {
+            AnsiConsole.MarkupLine($"[red]Script not found: {completeScriptPath}[/]");
+            return;
+        }
+
+        var psi = new ProcessStartInfo
+                  {
+                          FileName         = "wt.exe"
+                        , Arguments        = @$"--profile ""{environment.ToString().ToUpper()}: CP API"""
+                        , UseShellExecute  = true
+                        , CreateNoWindow   = false
+                        , WorkingDirectory = scriptFolderPath
+                  };
+
+        try
+        {
+            Process.Start(psi);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
+    }
+    private static async Task WaitForApiReady(Environment environment)
+    {
+        var healthEndpoint = ApiEnvironments.Url(environment) + "/Scalar";
+    
+        using var httpClient = new HttpClient();
+    
+        while (true)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync(healthEndpoint);
+                if (response.IsSuccessStatusCode) return;
+            }
+            catch
+            {
+                // API not ready yet
+            }
+        
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
+    private static void OpenScalar(Environment environment)
+    {
+        var scalarUrl = ApiEnvironments.Url(environment) + "/scalar";
+        Process.Start(new ProcessStartInfo(scalarUrl) { UseShellExecute = true });
+    }
+    
     private static async Task HandleBuildAsync()
     {
-        var panel = new Panel("[cyan]BUILD COMPONENT[/]").BorderColor(Color.Cyan1);
+        var panel = new Panel(MenuText.Commands.BuildComponent.Label).BorderColor(Color.Cyan1);
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
-        if (TrySelect(PromptForComponent(), out var component).Not())
+        if (TrySelect(PromptForComponent()
+                    , out var component).Not())
             return;
-        var environment = Environment.Dev;
-
-        if (component.Name.IsNotEqualTo("laa",                StringComparison.CurrentCultureIgnoreCase)
-         && component.Name.IsNotEqualTo("CpSharedPrimitives", StringComparison.CurrentCultureIgnoreCase)
-         && component.Name.IsNotEqualTo("CpClientCore",       StringComparison.CurrentCultureIgnoreCase)
-         && component.Name.IsNotEqualTo("AllNugetComponents", StringComparison.CurrentCultureIgnoreCase))
-        {
-            if (TrySelect(PromptForEnvironment()
-                        , out environment).Not())
-            {
-                return;
-            }
-        }
-
-        if (environment == Environment.Prod)
-        {
-            AnsiConsole.MarkupLine("[red]X Cannot build directly for Prod. Use 'Promote' instead.[/]");
-            PauseForUser();
-            return;
-        }
-
+        
         var buildCommand = new BuildCommand(component
-                                          , environment
+                                          , Environment.All
                                           , _serviceProvider!.GetRequiredService<IArtifactStorage>()
                                           , _serviceProvider!.GetRequiredService<IPowerShellExecutor>()
                                           , _serviceProvider!.GetRequiredService<IAuditLog>()
                                           , _serviceProvider!.GetRequiredService<ILogger<BuildCommand>>());
 
-         var result = await RunWithSpinnerAsync($"Building {component.Name}"
+        var result = await RunWithSpinnerAsync($"Building {component.Name}"
                                              , report => buildCommand.ExecuteAsync(report)
-                                             , Color.Red);
+                                             , Color.Cyan
+                                             , "For All Environments");
 
-        
         DisplayResult(result);
 
         PauseForUser();
     }
 
+
     private static async Task HandleDeployAsync()
     {
-        var panel = new Panel("[yellow]DEPLOY COMPONENT[/]").BorderColor(Color.Yellow);
-        
+        var panel = new Panel(MenuText.Commands.DeployComponent.Label).BorderColor(Color.Yellow);
+
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
@@ -286,25 +299,23 @@ public class Program
                     , out var component).Not())
             return;
 
-        if (TrySelect(PromptForEnvironment(), out var environment).Not())
+        if (TrySelect(PromptForEnvironment()
+                    , out var environment).Not())
             return;
         
-        
-        if (TrySelect(await PromptForVersion(component, environment), out var artifact).Not())
+        if (TrySelect(await PromptForVersion(component
+                                           , environment)
+                    , out var artifact).Not())
             return;
         
-
         var deployCommand = new DeployCommand(component
                                             , environment
                                             , _serviceProvider!.GetRequiredService<IArtifactStorage>()
                                             , _serviceProvider!.GetRequiredService<IPowerShellExecutor>()
-                                            , _serviceProvider!.GetRequiredService<IDeploymentStateService>()
                                             , _serviceProvider!.GetRequiredService<IAuditLog>()
                                             , _serviceProvider!.GetRequiredService<ILogger<DeployCommand>>()
                                             , scriptsPath: null
-                                            , force: false
-                                            , targetVersion: artifact.Version
-                                            , versionSelector: _serviceProvider!.GetService<IVersionSelector>());
+                                            , targetVersion: artifact.Version);
 
         // IMPORTANT: Don't use spinner for deployments!
         // Deployments may need user confirmation (Console.ReadLine)
@@ -315,113 +326,31 @@ public class Program
         DisplayResult(result);
         PauseForUser();
     }
-    
-    private static async Task HandlePromoteAsync()
-    {
-        var panel = new Panel("[red]PROMOTE TO PRODUCTION[/]").BorderColor(Color.Red);
-        
-        AnsiConsole.Write(panel);
-        AnsiConsole.WriteLine();
-        
-        var  component = PromptForComponent();
-        switch (component.Kind)
-        {
-            case PromptResultKind.Back:
-            case PromptResultKind.Cancel:
-                return; // go back ONE menu level or bubble higher if appropriate
-
-            case PromptResultKind.Success:
-                break; // continue
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        if (TrySelect(PromptOrBack("[yellow]Justification (required):[/]"
-                                 , input => input.HasValue()
-                                                    ? input
-                                                    : null)
-                    , out var justification).Not())
-        {
-            return;
-        }
-
-
-        var promoteCommand = new PromoteCommand(component.Value!
-                                              , justification
-                                              , _serviceProvider!.GetRequiredService<IArtifactStorage>()
-                                              , _serviceProvider!.GetRequiredService<IAuditLog>()
-                                              , _serviceProvider!.GetRequiredService<ILogger<PromoteCommand>>()
-        );
-        
-        // AnsiConsole.MarkupLine($"\n[red]Promoting {component.Name} to Production...[/]\n");
-        // var result = await promoteCommand.ExecuteAsync();
-
-        var result = await RunWithSpinnerAsync($"Promoting {component.Value!.Name} to Production..."
-                                             , () => promoteCommand.ExecuteAsync()
-                                             , Color.Red);
-
-        DisplayResult(result);
-        PauseForUser();
-    }
 
     private static async Task HandleVerifyAsync()
     {
-        var panel = new Panel("[green]VERIFY ENVIRONMENT[/]")
-                
-                .BorderColor(Color.Green);
+        var panel = new Panel(MenuText.Commands.VerifyEnvironment.Label).BorderColor(Color.Green);
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
-        if (TrySelect(PromptForEnvironment(), out var environment).Not())
+        if (TrySelect(PromptForEnvironment()
+                    , out var environment).Not())
             return;
-        
+
         var verifyCommand = new VerifyCommand(environment
                                             , _serviceProvider!.GetRequiredService<IAuditLog>()
                                             , _serviceProvider!.GetRequiredService<ILogger<VerifyCommand>>()
                                             , _serviceProvider!.GetRequiredService<HttpClient>()
         );
 
-        // AnsiConsole.MarkupLine($"\n[green]Verifying {environment} environment...[/]\n");
-        // var result = await verifyCommand.ExecuteAsync();
-        
         var result = await RunWithSpinnerAsync($"Verifying {environment} environment..."
                                              , () => verifyCommand.ExecuteAsync()
                                              , Color.Red);
-        
+
         DisplayResult(result);
         PauseForUser();
     }
-
-    private static async Task HandleRollbackAsync()
-    {
-        var panel = new Panel("[red]ROLLBACK PRODUCTION[/]").BorderColor(Color.Red);
-        
-        AnsiConsole.Write(panel);
-        AnsiConsole.WriteLine();
-
-        if (TrySelect(PromptForComponent(), out var component))
-            return;
-        
-        var version = AnsiConsole.Prompt(new TextPrompt<string>("[yellow]Target version to rollback to:[/]").PromptStyle("cyan")
-                                                                                                            .ValidationErrorMessage("[red]Version cannot be empty[/]")
-                                                                                                            .Validate(v => !string.IsNullOrWhiteSpace(v)));
-        var rollbackCommand = new RollbackCommand(component
-                                                , version
-                                                , _serviceProvider!.GetRequiredService<IArtifactStorage>()
-                                                , _serviceProvider!.GetRequiredService<IPowerShellExecutor>()
-                                                , _serviceProvider!.GetRequiredService<IAuditLog>()
-                                                , _serviceProvider!.GetRequiredService<ILogger<RollbackCommand>>());
-
-        // AnsiConsole.MarkupLine($"\n[red]Rolling back {component.Name}...[/]\n");
-        // var result = await rollbackCommand.ExecuteAsync();
-
-        var result = await RunWithSpinnerAsync($"Rolling back {component.Name}..."
-                                             , () => rollbackCommand.ExecuteAsync()
-                                             , Color.Red);
-        DisplayResult(result);
-        PauseForUser();
-    }
-
+    
     private static async Task HandleViewAuditLogsAsync()
     {
         var panel = new Panel("[cyan]RECENT AUDIT LOGS[/]")
@@ -453,7 +382,7 @@ public class Program
         {
             var statusMarkup = entry.Success
                                        ? "[green]  ✅   [/]"
-                                       :   "[red]  ⛔   [/]";
+                                       : "[red]  ⛔   [/]";
             var envMarkup = entry.Environment?.ToString() ?? "N/A";
 
             table.AddRow(statusMarkup
@@ -471,19 +400,17 @@ public class Program
 
     private static async Task HandleListArtifactsAsync()
     {
-        var panel = new Panel("[cyan]LIST ARTIFACTS[/]").BorderColor(Color.Cyan1);
-        
+        var panel = new Panel(MenuText.Commands.ListArtifacts.Label).BorderColor(Color.Cyan1);
+
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
         if (TrySelect(PromptForComponent()
                     , out var component).Not())
             return;
-        
-        var storage   = _serviceProvider!.GetRequiredService<IArtifactStorage>();
-        var artifacts = await storage.GetAllArtifactsAsync(component,    Environment.Dev);
-        artifacts.AddRange(await storage.GetAllArtifactsAsync(component, Environment.Qa));
-        artifacts.AddRange(await storage.GetAllArtifactsAsync(component, Environment.Prod));
+
+        var storage = _serviceProvider!.GetRequiredService<IArtifactStorage>();
+        var artifacts = await storage.GetAllArtifactsAsync(component);
         
         if (artifacts.Count == 0)
         {
@@ -500,10 +427,10 @@ public class Program
                                .AddColumn("Build Machine")
                                .AddColumn("Path");
 
-        foreach (var artifact in artifacts.OrderByDescending(a => a.Metadata.BuildTimestamp))
+        foreach (var artifact in artifacts.OrderByDescending(artifact => artifact.Metadata.BuildTimestamp))
         {
-            var envColorTuple = GetEnvColor(artifact.Path);
-            
+            var envColorTuple = GetEnvColor(artifact.Metadata.BuiltFor);
+
             table.AddRow($"[{envColorTuple.Color}]{envColorTuple.Env}[/]"
                        , artifact.Version
                        , artifact.Metadata.BuildTimestamp.ToString("yyyy-MM-dd HH:mm:ss")
@@ -515,104 +442,104 @@ public class Program
         PauseForUser();
     }
 
-    
-    private static (string Color, string Env) GetEnvColor( string artifactPath )
+
+    private static (string Color, string Env) GetEnvColor(Environment environment )
     {
-        var lowerPath = artifactPath.ToLower();
-        var isDev     = lowerPath.EndsWith("dev.zip");
-        var isQa      = lowerPath.EndsWith("qa.zip");
-        var isProd    = lowerPath.EndsWith("prod.zip");
 
-        (string Color, string Env) envColorTuple = ("", "");
+        (string Color, string Env) envColorTuple = environment switch
+        {
+                Environment.Dev  => ("green", "Dev")
+              , Environment.Qa   => ("yellow", "Qa")
+              , Environment.Prod => ("red", "Prod")
+              , _                => ("grey", "All")
+        };
 
-        if (isDev)
-            envColorTuple = ("green", "Dev");
-        else if (isQa)
-            envColorTuple = ("yellow", "Qa");
-        else if (isProd)
-            envColorTuple = ("red", "Prod");
-        else
-            envColorTuple = ("grey", "All");
-        
         return envColorTuple;
     }
 
-    private static PromptResult<Component> PromptForComponent(bool isDeploy = false)
+    private static PromptResult<Component> PromptForComponent( bool isDeploy = false )
     {
-        if (isDeploy)
+        var options = new List<PromptOption<Component>>
+                      {
+                              new(MenuText.ComponentMenu.Api
+                                , Component.CpApi)
+                            , new(MenuText.ComponentMenu.LocalAiAssistant
+                                , Component.LaaMauiApp)
+                      };
+
+        if (!isDeploy)
         {
-            return PromptOrBack("[cyan]Select component:[/]"
-                              , new Dictionary<string, Component>
-                                {
-                                        { "🧠  API (CpApi)", Component.CpApi }
-                                      , { "📱  LocalAiAssistant (Laa) -> All Envs", Component.LaaMauiApp }
-                                });    
+            options.AddRange(new[]
+                             {
+                                     new PromptOption<Component>("📦  All NuGets"
+                                                               , Component.AllNugetComponents)
+                             });
         }
-        return PromptOrBack("[cyan]Select component:[/]"
-                          , new Dictionary<string, Component>
-                            {
-                                    { "🧠  API (CpApi)", Component.CpApi }
-                                  , { "📱  LocalAiAssistant (Laa) -> All Envs", Component.LaaMauiApp }
-                                  , { "🛠️ CpSharedPrimitives", Component.CpSharedPrimitives }
-                                  , { "⚗️  CpClientCore", Component.CpClientCore }
-                                  , { "📦  All NuGets", Component.AllNugetComponents }
-                            });
+
+        return PromptOrBack(MenuText.Prompts.SelectComponent
+                          , options);
     }
 
+    
+    private static PromptResult<Environment> PromptForEnvironment(bool allowProd = true)
+    {
+        var options = new List<PromptOption<Environment>>
+                      {
+                              new(MenuText.Environments.Dev, Environment.Dev),
+                              new(MenuText.Environments.Qa, Environment.Qa)
+                      };
+
+        if (allowProd)
+            options.Add(new PromptOption<Environment>(MenuText.Environments.Prod
+                                                    , Environment.Prod));
+
+        return PromptOrBack(MenuText.Prompts.SelectEnvironment, options);
+    }
+
+    
     private static async Task<PromptResult<Artifact>> PromptForVersion( Component   component
                                                                       , Environment environment
                                                                       , int         numberOfArtifacts = 5 )
     {
-        var artifactStorage = new LocalArtifactStorage(_serviceProvider!.GetRequiredService<ILogger<LocalArtifactStorage>>());
+        var artifactStorage = _serviceProvider!.GetRequiredService<IArtifactStorage>();
+
         var artifacts = await artifactStorage.GetMostRecentArtifactsAsync(component
                                                                         , environment
                                                                         , numberOfArtifacts);
-        var artifactMenuItems = artifacts.ToDictionary(artifact => $"{artifact.Version} - {artifact.Metadata.BuiltFor}");
-        
-        return PromptOrBack("[cyan]Select version:[/]"
-                          , artifactMenuItems);
-    }
-    
-    private static PromptResult<Environment> PromptForEnvironment( bool allowProd = true )
-    {
-        var choices = new Dictionary<string, Environment>
-                      {
-                              { "🔨 Dev", Environment.Dev }
-                            , { "🧪 QA", Environment.Qa }
-                      };
+        var availableArtifacts = artifacts.ToList();
+        var options = availableArtifacts.Select(artifact => new PromptOption<Artifact>($"{artifact.Version} - {artifact.Metadata.BuiltFor}"
+                                                                                     , artifact)).ToList();
 
-        if (allowProd) choices.Add("🚀 Prod", Environment.Prod);
-
-        return PromptOrBack("[cyan]Select environment:[/]"
-                          , choices);
+        return PromptOrBack(MenuText.Prompts.SelectVersion
+                          , options);
     }
-    
+
     private static void PauseForUser()
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.Markup("[grey]Press any key to continue...[/]");
-        
+        AnsiConsole.Markup(MenuText.Navigation.PressAnyKey);
+
         Console.ReadKey(true);
     }
 
-    
+
     private static void DisplayResult( CommandResult result )
     {
         AnsiConsole.WriteLine();
 
         if (result.Success)
         {
-            var successPanel = new Panel($"[green]✅  SUCCESS [/]\n\n{result.Message
-                                                                           .EscapeMarkup()}").BorderColor(Color.Green)
-                                                                                             //.Padding(1, 1)
-                                                                                             ;
+            var successPanel = new Panel($"[green]{MenuText.Results.Success} [/]\n\n{result.Message.EscapeMarkup()}").BorderColor(Color.Green);
             AnsiConsole.Write(successPanel);
         }
         else
         {
-            var failurePanel = new Panel($"[red]⛔  FAILURE[/]\n\n{result.Message
-                                                                        .EscapeMarkup()}").BorderColor(Color.Red)
-                                                                                                  .Padding(1, 1);
+            var innerPanelText = result.Message.HasValue()
+                                         ? $"\n\n{result.Message.EscapeMarkup()}"
+                                         : string.Empty;
+
+            var failurePanel = new Panel($"[red]{MenuText.Results.Failure}[/]{innerPanelText}").BorderColor(Color.Red);
+                                                                                              // .Padding(1, 1);
             AnsiConsole.Write(failurePanel);
 
             if (result.ErrorDetails?.HasValue() ?? false)
@@ -624,13 +551,13 @@ public class Program
 
         AnsiConsole.WriteLine();
     }
-    
+
     private static void DisplayCommandLineResult( CommandResult result )
     {
         Console.WriteLine();
         Console.WriteLine(result.Success
-                                  ? "✅  SUCCESS "
-                                  : "⛔ FAILURE");
+                                  ? MenuText.Results.Success
+                                  : MenuText.Results.Failure);
         Console.WriteLine(result.Message);
 
         if (result.ErrorDetails?.HasValue() ?? false)
@@ -643,16 +570,14 @@ public class Program
         Console.WriteLine();
     }
 
-    
+
     private static RootCommand BuildRootCommand( ServiceProvider serviceProvider )
     {
         var rootCommand = new RootCommand("ReleaseConsole - Deliberate deployment control system");
 
         rootCommand.Add(BuildBuildCommand(serviceProvider));
         rootCommand.Add(BuildDeployCommand(serviceProvider));
-        rootCommand.Add(BuildPromoteCommand(serviceProvider));
         rootCommand.Add(BuildVerifyCommand(serviceProvider));
-        rootCommand.Add(BuildRollbackCommand(serviceProvider));
 
         return rootCommand;
     }
@@ -660,10 +585,10 @@ public class Program
     private static Command BuildBuildCommand( ServiceProvider serviceProvider )
     {
         var componentArg = new Argument<string>("component");
-        componentArg.Description = $"Component to build (acceptable component types: '{nameof(Component.CpApi)}', '{nameof(Component.LaaMauiApp)}' or \"maui\", `{nameof(Component.CpSharedPrimitives)} or \"lib1\"`, or '{nameof(Component.CpClientCore)} or \"lib2\"' )\"";
+        componentArg.Description = $"Component to build";
 
         var envOption = new Option<string>("--env"
-                                         , "Target environment (dev, qa)")
+                                         , "Target environment (dev, qa, prod)")
                         {
                                 IsRequired = true
                         };
@@ -671,39 +596,29 @@ public class Program
         var command = new Command("build"
                                 , "Build a component and create a versioned artifact")
                       {
-                              componentArg
-                            , envOption
+                              componentArg, envOption
                       };
 
-        command.SetHandler(async ( componentName, envName ) =>
+        command.SetHandler(async ( componentName
+                                 , envName ) =>
                            {
                                try
                                {
                                    var component   = Component.FromString(componentName);
                                    var environment = ParseEnvironment(envName);
 
-                                   if (environment == Environment.Prod)
-                                   {
-                                       Console.WriteLine("ERROR: Cannot build directly for Prod. Use 'promote' instead.");
-                                       return;
-                                   }
+                                   // Note: BuildCommand constructor handles environment restrictions per component type
 
                                    var buildCommand = new BuildCommand(component
                                                                      , environment
                                                                      , serviceProvider.GetRequiredService<IArtifactStorage>()
                                                                      , serviceProvider.GetRequiredService<IPowerShellExecutor>()
                                                                      , serviceProvider.GetRequiredService<IAuditLog>()
-                                                                     , serviceProvider.GetRequiredService<ILogger<BuildCommand>>());
+                                                                     , serviceProvider.GetRequiredService<ILogger<BuildCommand>>()
+                                   );
 
-                                   // AnsiConsole.MarkupLine($"\n[cyan]Building {component.Name} for {environment}...[/]\n");
-                                   // var result = await buildCommand.ExecuteAsync();
-                                  
-                                   
-                                   var result = await RunWithSpinnerAsync($"Building {component.Name}..."
-                                                                        , () => buildCommand.ExecuteAsync()
-                                                                        , Color.Cyan1);
-
-                                   DisplayCommandLineResult(result);
+                                   var result = await buildCommand.ExecuteAsync();
+                                   DisplayResult(result);
                                }
                                catch (Exception ex)
                                {
@@ -719,32 +634,30 @@ public class Program
     private static Command BuildDeployCommand( ServiceProvider serviceProvider )
     {
         var componentArg = new Argument<string>("component"
-                                              , "Component to deploy");
+                                              , "Component to deploy"
+        );
 
-        var envOption = new Option<string>("--env"
-                                         , "Target environment (dev, qa, prod)") 
-                        { IsRequired = true };
+        var envOption = new Option<string>(
+                            "--env"
+                          , "Target environment (dev, qa, prod)"
+                        ) { IsRequired = true };
 
-        var versionOption = new Option<string?>(  // ← NEW
-                                "--version",
-                                "Specific version to deploy (optional, defaults to latest)"
+        var versionOption = new Option<string?>(
+                                "--version"
+                              , "Specific version to deploy (optional - defaults to latest)"
                             ) { IsRequired = false };
 
-        var forceOption = new Option<bool>(  // ← NEW
-                              "--force",
-                              "Skip confirmation prompts"
-                          ) { IsRequired = false };
-
         var command = new Command("deploy"
-                                , "Deploy the latest artifact to an environment")
+                                , "Deploy an artifact to an environment")
                       {
                               componentArg
                             , envOption
                             , versionOption
-                            , forceOption
                       };
 
-        command.SetHandler(async (componentName, envName, version, force) =>
+        command.SetHandler(async ( componentName
+                                 , envName
+                                 , version ) =>
                            {
                                try
                                {
@@ -755,16 +668,14 @@ public class Program
                                                                        , environment
                                                                        , serviceProvider.GetRequiredService<IArtifactStorage>()
                                                                        , serviceProvider.GetRequiredService<IPowerShellExecutor>()
-                                                                       , serviceProvider.GetRequiredService<IDeploymentStateService>()
                                                                        , serviceProvider.GetRequiredService<IAuditLog>()
                                                                        , serviceProvider.GetRequiredService<ILogger<DeployCommand>>()
                                                                        , scriptsPath: null
-                                                                       , force: force
                                                                        , targetVersion: version
-                                                                       , versionSelector: serviceProvider.GetService<IVersionSelector>());
+                                   );
 
                                    var result = await deployCommand.ExecuteAsync();
-                                   DisplayCommandLineResult(result);
+                                   DisplayResult(result);
                                }
                                catch (Exception ex)
                                {
@@ -773,51 +684,7 @@ public class Program
                            }
                          , componentArg
                          , envOption
-                         , versionOption
-                         , forceOption);
-
-        return command;
-    }
-
-    private static Command BuildPromoteCommand( ServiceProvider serviceProvider )
-    {
-        var componentArg = new Argument<string>("component"
-                                              , "Component to promote");
-
-        var justificationOption = new Option<string>("--reason"
-                                                   , "Justification for production promotion")
-                                  { IsRequired = true };
-
-        var command = new Command("promote"
-                                , "Promote a QA artifact to Production")
-                      {
-                              componentArg
-                            , justificationOption
-                      };
-
-        command.SetHandler(async ( componentName
-                                 , justification ) =>
-                           {
-                               try
-                               {
-                                   var component = Component.FromString(componentName);
-
-                                   var promoteCommand = new PromoteCommand(component
-                                                                         , justification
-                                                                         , serviceProvider.GetRequiredService<IArtifactStorage>()
-                                                                         , serviceProvider.GetRequiredService<IAuditLog>()
-                                                                         , serviceProvider.GetRequiredService<ILogger<PromoteCommand>>());
-
-                                   var result = await promoteCommand.ExecuteAsync();
-                                   DisplayCommandLineResult(result);
-                               }
-                               catch (Exception ex)
-                               {
-                                   Console.WriteLine($"ERROR: {ex.Message}");
-                               }
-                           }
-                         , componentArg
-                         , justificationOption);
+                         , versionOption);
 
         return command;
     }
@@ -856,52 +723,6 @@ public class Program
         return command;
     }
 
-    private static Command BuildRollbackCommand( ServiceProvider serviceProvider )
-    {
-        var componentArg = new Argument<string>("component"
-                                              , "Component to rollback");
-
-        var versionOption = new Option<string>("--to"
-                                             , "Target version to rollback to")
-                            { IsRequired = true };
-
-        var command = new Command("rollback"
-                                , "Rollback to a previous production version")
-                      {
-                              componentArg
-                            , versionOption
-                      };
-
-        command.SetHandler(async ( componentName
-                                 , version ) =>
-                           {
-                               try
-                               {
-                                   var component = Component.FromString(componentName);
-
-                                   var rollbackCommand = new RollbackCommand(component
-                                                                           , version
-                                                                           , serviceProvider.GetRequiredService<IArtifactStorage>()
-                                                                           , serviceProvider.GetRequiredService<IPowerShellExecutor>()
-                                                                           , serviceProvider.GetRequiredService<IAuditLog>()
-                                                                           , serviceProvider.GetRequiredService<ILogger<RollbackCommand>>()
-                                   );
-
-                                   var result = await rollbackCommand.ExecuteAsync();
-                                   DisplayCommandLineResult(result);
-                               }
-                               catch (Exception ex)
-                               {
-                                   Console.WriteLine($"ERROR: {ex.Message}");
-                               }
-                           }
-                         , componentArg
-                         , versionOption);
-
-        return command;
-    }
-
-    
     private static Environment ParseEnvironment( string envName ) => envName.ToLowerInvariant() switch
     {
             "dev"  => Environment.Dev
@@ -913,7 +734,7 @@ public class Program
     private static bool TrySelect<T>( PromptResult<T> result
                                     , out T           value )
     {
-        if (result.Kind != PromptResultKind.Success)
+        if (result.Kind != PromptResultKind.Selected)
         {
             value = default!;
             return false;
@@ -922,7 +743,6 @@ public class Program
         value = result.Value!;
         return true;
     }
-
 
 
     private static ServiceCollection ConfigureServices()
@@ -943,6 +763,44 @@ public class Program
         services.AddSingleton<HttpClient>();
 
         return services;
+    }
+    
+    public static async Task ShowAllSpinnersAsync()
+    {
+        // 1. Get the "Known" spinners via Reflection
+        var knownSpinners = typeof(Spinner.Known).GetProperties(BindingFlags.Public
+                                                              | BindingFlags.Static)
+                                                 .Where(propertyInfo => propertyInfo.PropertyType == typeof(Spinner))
+                                                 .Select(propertyInfo => new
+                                                                         {
+                                                                                 Name    = propertyInfo.Name
+                                                                               , Spinner = (Spinner)propertyInfo.GetValue(null)!
+                                                                         });
+
+        // 2. Create your custom spinner instance
+        var custom = new
+                     {
+                             Name    = "CustomCaseSwapper"
+                           , Spinner = (Spinner)new CaseSwappingSpinner("Thinking")
+                     };
+
+        // 3. Combine them (Custom first, then Known)
+        var allSpinners = new[] { custom }.Concat(knownSpinners);
+
+        foreach (var item in allSpinners)
+        {
+            await AnsiConsole.Status()
+                             .Spinner(item.Spinner)
+                             .SpinnerStyle(Style.Parse("cyan"))
+                             .StartAsync($"Spinner: {item.Name.EscapeMarkup()}"
+                                       , async _ =>
+                                         {
+                                             await Task.Delay(20000);
+                                         });
+        }
+
+        AnsiConsole.MarkupLine("\n[grey]Done previewing spinners. Press any key…[/]");
+        Console.ReadKey();
     }
 
 }

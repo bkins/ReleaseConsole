@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
+using Moq;
+using ReleaseConsole.Core;
 using ReleaseConsole.Services;
 using ReleaseConsole.Services.Interfaces;
+using Environment = System.Environment;
 
 namespace ReleaseConsole.Commands;
 
@@ -27,7 +30,7 @@ public sealed class VerifyCommand : CommandBaseCommand
 
     protected override ReleaseConsole.Core.Environment? GetEnvironment() => _environment;
 
-    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct, Action<string>? report = null)
+    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct)
     {
         // Logger.LogInformation("Verifying {Environment} environment", _environment);
 
@@ -56,7 +59,7 @@ public sealed class VerifyCommand : CommandBaseCommand
 
     private async Task<(bool Success, string Details)> PerformHttpHealthCheckAsync(CancellationToken ct)
     {
-        var endpoint = GetHealthEndpoint();
+        var endpoint = GetHealthEndpoint(_environment);
         if (endpoint is null)
         {
             return (true, "No health endpoint configured");
@@ -99,13 +102,15 @@ public sealed class VerifyCommand : CommandBaseCommand
         return (true, "Database check not implemented (placeholder)");
     }
 
-    private string? GetHealthEndpoint() => _environment switch
+    public static string? GetHealthEndpoint(ReleaseConsole.Core.Environment environment)
     {
-            ReleaseConsole.Core.Environment.Dev  => $"{HostRoot}:5273/health/ready",
-            ReleaseConsole.Core.Environment.Qa   => $"{HostRoot}:5274/health/ready",
-            ReleaseConsole.Core.Environment.Prod => $"{HostRoot}:5275/health/ready",
-            _                                    => null
-    };
+        return ApiEnvironments.Url(environment) + "/health/ready";
+    }
+    //   Core.Environment.Dev  => ApiEnvironments.Url(_environment) //$"{HostRoot}:5273/health/ready"
+    // , Core.Environment.Qa   => $"{HostRoot}:5274/health/ready"
+    // , Core.Environment.Prod => $"{HostRoot}:5275/health/ready"
+    // , _                     => null
+
 
     private string? GetExpectedDeploymentPath()
     {

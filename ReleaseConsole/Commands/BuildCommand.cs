@@ -13,7 +13,7 @@ namespace ReleaseConsole.Commands;
 public sealed class BuildCommand : CommandBaseCommand
 {
     private readonly Component           _component;
-    private readonly Environment         _environment;
+    public           Environment         Environment;
     private readonly IArtifactStorage    _artifactStorage;
     private readonly IPowerShellExecutor _psExecutor;
     private readonly string              _scriptsPath;
@@ -23,60 +23,143 @@ public sealed class BuildCommand : CommandBaseCommand
     
     private bool OnlyNecessaryLogging => OutputMode is not ScriptOutputMode.Normal 
                                                     and not ScriptOutputMode.Verbose;
+
     public BuildCommand( Component             component
                        , Environment           environment
                        , IArtifactStorage      artifactStorage
                        , IPowerShellExecutor   psExecutor
                        , IAuditLog             auditLog
                        , ILogger<BuildCommand> logger
-                       , string?               scriptsPath = null)
-            : base(auditLog, logger)
+                       , string?               scriptsPath = null )
+            : base(auditLog
+                 , logger)
     {
-        // Special handling for MAUI components: they MUST be built per environment
-        // because environment-specific settings (API URLs, ApplicationId, etc.) 
-        // are compiled into the binary and cannot be promoted like API components.
-        // All other components follow the promote pattern (build Dev/QA, promote to Prod).
-        if (environment == Environment.Prod 
-         && component.Type != ComponentType.Laa)
-        {
-            throw new InvalidOperationException("Cannot build directly for Prod. Use promote instead.");
-        }
+        // Only restrict Prod builds for non-API components
+        // API builds universal artifacts that work in any environment
+        if (component.Type != ComponentType.Api && environment == Environment.Prod)
+            throw new InvalidOperationException($"Cannot build {component.Name} directly for Prod. Build for QA and deploy to Prod.");
 
         _component       = component;
-        _environment     = environment;
+        Environment      = environment;
         _artifactStorage = artifactStorage;
         _psExecutor      = psExecutor;
         _scriptsPath     = scriptsPath ?? GetDefaultScriptsPath();
-        
-        _psExecutor.OutputMode = OutputMode;
     }
 
     public override string Name        => "build";
-    public override string Description => $"Build {_component.Name} for {_environment}";
+    public override string Description => $"Build {_component.Name} for {Environment}";
 
     protected override string       GetComponentName() => _component.Name;
-    protected override Environment? GetEnvironment()   => _environment;
+    protected override Environment? GetEnvironment()   => Environment;
 
-    protected override async Task<CommandResult> ExecuteInternalAsync(CancellationToken ct, Action<string>? report = null)
+    protected override async Task<CommandResult> ExecuteInternalAsync( CancellationToken ct)
     {
-        var version = GenerateVersion();
+        var version = GenerateVersion();    
         
-        // MAUI components require building all environments at once
-        if (_component.Type is ComponentType.Laa
-                            or ComponentType.CpSharedPrimitives
-                            or ComponentType.CpClientCore
-                            or ComponentType.AllNuget)
+        // Execute build script
+        var scriptPath = GetBuildScriptPath();
+        
+        if (File.Exists(scriptPath)
+                .Not())
         {
-            return await BuildAllEnvironmentsAsync(_component
-                                                 , ct
-                                                 , report);
+            return CommandResult.Fail($"Build script not found: {scriptPath}");
         }
 
-        // Standard single-environment build for API and libraries
-        return await BuildSingleEnvironmentAsync(_environment, version, ct, report);
+        Dictionary<string, string> parameters;
+        PowerShellResult           psResult = new PowerShellResult(false, "Unknown Error", "Unknown Error Occurred!", -1);
+        
+        switch (_component.Type)
+        {
+            case ComponentType.Api:
+                parameters = new Dictionary<string, string>
+                             {
+                                     ["Environment"] = Environment.ToString()
+                                   , ["Version"]     = version!
+                                   , ["OutputPath"] = Path.Combine(_artifactStorage.GetArtifactsRootPath()
+                                                                 , _component.Name
+                                                                 , version)
+                             };
+
+                psResult = await _psExecutor.ExecuteScriptAsync(scriptPath
+                                                              , _component.Type
+                                                              , parameters
+                                                              , ct);
+                break;
+            case ComponentType.Laa:
+            {
+                foreach (var environment in new List<Environment> { Environment.Dev, Environment.Qa, Environment.Prod })
+                {
+                    parameters = new Dictionary<string, string>
+                                 {
+                                         ["Environment"] = environment.ToString()
+                                       , ["Version"]     = version!
+                                       , ["ArtifactsPath"] = Path.Combine(_artifactStorage.GetArtifactsRootPath()
+                                                                        , _component.Name
+                                                                        , version)
+                                 };
+
+                    psResult = await _psExecutor.ExecuteScriptAsync(scriptPath
+                                                                  , _component.Type
+                                                                  , parameters
+                                                                  , ct);
+                }
+
+                break;
+            }
+            default:
+                psResult = await _psExecutor.ExecuteScriptAsync(scriptPath
+                                                              , _component.Type
+                                                              , new Dictionary<string, string>()
+                                                              , ct);
+                break;
+        }
+        
+        if (psResult.Success.Not())
+        {
+            Logger.LogError("Build script failed with exit code {ExitCode}\nDetails:\n{Details}"
+                          , psResult.ExitCode
+                          , psResult.Output);
+            return CommandResult.Fail("Build script failed"
+                                    , psResult.Error);
+        }
+
+        if (_component.Type == ComponentType.AllNuget)
+        {
+            return CommandResult.Ok(psResult.Output);
+        }
+        // Determine the output path (your dotnet publish output location)
+        var publishOutputPath = @$"C:\CP\Artifacts\{_component.Name}"; //GetPublishOutputPath();
+        if (Directory.Exists(publishOutputPath).Not())
+        {
+            return CommandResult.Fail($"Build output not found at: {publishOutputPath}");
+        }
+
+        // Create artifact metadata
+        // For API: BuiltFor is just the environment label used during build (but artifact is universal)
+        // For MAUI: BuiltFor is the actual target environment
+        var metadata = new ArtifactMetadata(_component.Name
+                                          , version
+                                          , Environment
+                                          , // This is now just metadata, not a deployment restriction
+                                            GetGitCommitHash()
+                                          , DateTime.UtcNow
+                                          , System.Environment.MachineName
+                                          , ConsoleVersion.Version);
+
+        // Save artifact
+        var artifact = await _artifactStorage.SaveArtifactAsync(_component
+                                                              , version!
+                                                              , publishOutputPath
+                                                              , metadata
+                                                              , ct);
+
+        Logger.LogInformation("Artifact saved: {Path}"
+                            , artifact.Path);
+
+        return CommandResult.Ok($"Built {_component.Name} v{version} for {Environment}\n" + $"Artifact: {artifact.Path}");
     }
 
-    
+
     public delegate void StatusReporter(string message);
 
     /// <summary>
@@ -346,9 +429,17 @@ public sealed class BuildCommand : CommandBaseCommand
                               + $"Artifact: {zipPath}");
     }
     
-    private string GetBuildScriptPath() => Path.Combine(_scriptsPath, $"{_component.Name}-Build.ps1");
+    private string GetBuildScriptPath()
+    {
+        var scriptName = _component.Type switch
+                         {
+                                 ComponentType.AllNuget => "publish-local-nuget.ps1"
+                                , _                     => $"{_component.Name}-Build.ps1"
+                         };
+        return Path.Combine(_scriptsPath, scriptName);
+    }
 
-    private static string GenerateVersion(string major = "1", string minor = "0")
+    public static string GenerateVersion(string major = "1", string minor = "0")
     {
         var now            = DateTime.UtcNow.ToLocalTime();
         var epoch          = new DateTime(now.Year - 6, 1, 1);

@@ -95,23 +95,18 @@ if (-not $targetDevice) {
 Write-Host "Target Device: $targetDevice"
 Write-Host ""
 
-# Uninstall current version if provided
-if ($CurrentApkName) {
-    Write-Host "Uninstalling current version ($CurrentVersion)..."
-    Write-Host "  App ID: $appId"
-    
-    $uninstallResult = adb -s $targetDevice uninstall $appId 2>&1
-    
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅  Successfully uninstalled previous version"
-    }
-    else {
-        Write-Host "⚠️  App was not installed or uninstall failed (this is usually fine for first-time deployments)"
-        Write-Host "   Details: $uninstallResult"
-    }
-    
-    Write-Host ""
+# Always attempt to uninstall existing version first (handles signature mismatch scenarios)
+Write-Host "Checking for existing installation..."
+$uninstallResult = adb -s $targetDevice uninstall $appId 2>&1
+
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅  Uninstalled existing version"
 }
+else {
+    Write-Host "ℹ️  No existing installation found (first-time deploy)"
+}
+
+Write-Host ""
 
 # Install new version
 Write-Host "Installing new version ($Version)..."

@@ -31,7 +31,7 @@ public abstract class CommandBaseCommand : ICommand, ILogger
         try
         {
             // Pass the reporter through so derived commands can update the UI spinner.
-            result = await ExecuteInternalAsync(CancellationToken.None, report);
+            result = await ExecuteInternalAsync(CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -40,6 +40,7 @@ public abstract class CommandBaseCommand : ICommand, ILogger
         }
 
         var duration = DateTime.UtcNow - startTime;
+        result.Message += $" (Duration: {duration.TotalSeconds:F2}s)";
         // Logger.LogInformation("Command {CommandName} completed in {Duration}ms with status: {Success}"
         //                     , Name
         //                     , duration.TotalMilliseconds
@@ -52,7 +53,7 @@ public abstract class CommandBaseCommand : ICommand, ILogger
         return result;
     }
 
-    protected abstract Task<CommandResult> ExecuteInternalAsync(CancellationToken ct, Action<string>? report = null);
+    protected abstract Task<CommandResult> ExecuteInternalAsync(CancellationToken ct);
     
     protected virtual Task LogAuditEntryAsync(CommandResult result, CancellationToken ct)
     {
