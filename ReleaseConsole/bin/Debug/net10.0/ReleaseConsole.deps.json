@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v10.0": {
       "ReleaseConsole/1.0.0": {
         "dependencies": {
-          "CP.Client.Core": "0.1.44",
+          "CP.Client.Core": "0.1.46",
           "FluentAssertions": "8.8.0",
           "Microsoft.Extensions.DependencyInjection": "10.0.2",
           "Microsoft.Extensions.Logging": "10.0.2",
@@ -33,22 +33,22 @@
           }
         }
       },
-      "CP.Client.Core/0.1.44": {
+      "CP.Client.Core/0.1.46": {
         "dependencies": {
-          "CP.Shared.Primitives": "0.1.41"
+          "CP.Shared.Primitives": "0.1.43"
         },
         "runtime": {
           "lib/netstandard2.1/CP.Client.Core.dll": {
-            "assemblyVersion": "0.1.44.0",
-            "fileVersion": "0.1.44.0"
+            "assemblyVersion": "0.1.46.0",
+            "fileVersion": "0.1.46.0"
           }
         }
       },
-      "CP.Shared.Primitives/0.1.41": {
+      "CP.Shared.Primitives/0.1.43": {
         "runtime": {
           "lib/netstandard2.1/CP.Shared.Primitives.dll": {
-            "assemblyVersion": "0.1.41.0",
-            "fileVersion": "0.1.41.0"
+            "assemblyVersion": "0.1.43.0",
+            "fileVersion": "0.1.43.0"
           }
         }
       },
@@ -361,19 +361,19 @@
       "path": "castle.core/5.1.1",
       "hashPath": "castle.core.5.1.1.nupkg.sha512"
     },
-    "CP.Client.Core/0.1.44": {
+    "CP.Client.Core/0.1.46": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-35+MC/rXgbJlRLJsKWbG0sOUVhVGlUsY0K5mJDMCrcMC1s+jHgCb0Ovuzvg1UXY1GKAyfudhcZi1YkirZExC5g==",
-      "path": "cp.client.core/0.1.44",
-      "hashPath": "cp.client.core.0.1.44.nupkg.sha512"
+      "sha512": "sha512-w477mglciM2QqCnIke/xaFdensgvI5vxX3eYWRSOuOfUsm5eKDqTN7B/y4GOvo4a1dPKWRhwTFpOQZjueF7xvg==",
+      "path": "cp.client.core/0.1.46",
+      "hashPath": "cp.client.core.0.1.46.nupkg.sha512"
     },
-    "CP.Shared.Primitives/0.1.41": {
+    "CP.Shared.Primitives/0.1.43": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-EKX4XE92URn07dRp4AQAsBkT9D1G6on2FjF5mKkA0XhcWf86VwOHdVjNSM/lgeT6fFcKLffriW+7h4Rgx5py4g==",
-      "path": "cp.shared.primitives/0.1.41",
-      "hashPath": "cp.shared.primitives.0.1.41.nupkg.sha512"
+      "sha512": "sha512-4KXjgOOepvIBAKpIWPVEFkc8jxa/XyiLf6pi6ys97o3PDvz3I0WygJa4HQISsLo7qEFee51j4+MeEmI7hCZbhg==",
+      "path": "cp.shared.primitives/0.1.43",
+      "hashPath": "cp.shared.primitives.0.1.43.nupkg.sha512"
     },
     "FluentAssertions/8.8.0": {
       "type": "package",

@@ -18,10 +18,10 @@
           }
         }
       },
-      "CP.Client.Core/0.1.44": {
+      "CP.Client.Core/0.1.46": {
         "type": "package",
         "dependencies": {
-          "CP.Shared.Primitives": "0.1.41"
+          "CP.Shared.Primitives": "0.1.43"
         },
         "compile": {
           "lib/netstandard2.1/CP.Client.Core.dll": {}
@@ -67,7 +67,7 @@
           }
         }
       },
-      "CP.Shared.Primitives/0.1.41": {
+      "CP.Shared.Primitives/0.1.43": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/CP.Shared.Primitives.dll": {}
@@ -547,10 +547,10 @@
         "readme.txt"
       ]
     },
-    "CP.Client.Core/0.1.44": {
-      "sha512": "35+MC/rXgbJlRLJsKWbG0sOUVhVGlUsY0K5mJDMCrcMC1s+jHgCb0Ovuzvg1UXY1GKAyfudhcZi1YkirZExC5g==",
+    "CP.Client.Core/0.1.46": {
+      "sha512": "w477mglciM2QqCnIke/xaFdensgvI5vxX3eYWRSOuOfUsm5eKDqTN7B/y4GOvo4a1dPKWRhwTFpOQZjueF7xvg==",
       "type": "package",
-      "path": "cp.client.core/0.1.44",
+      "path": "cp.client.core/0.1.46",
       "files": [
         ".nupkg.metadata",
         "content/API-Client-Library_Flow.md",
@@ -567,18 +567,18 @@
         "contentFiles/any/netstandard2.1/CompleteCleanAndRebuild.ps1",
         "contentFiles/any/netstandard2.1/FilesAndFolders.ps1",
         "contentFiles/any/netstandard2.1/publish-local-nuget.ps1",
-        "cp.client.core.0.1.44.nupkg.sha512",
+        "cp.client.core.0.1.46.nupkg.sha512",
         "cp.client.core.nuspec",
         "lib/netstandard2.1/CP.Client.Core.dll"
       ]
     },
-    "CP.Shared.Primitives/0.1.41": {
-      "sha512": "EKX4XE92URn07dRp4AQAsBkT9D1G6on2FjF5mKkA0XhcWf86VwOHdVjNSM/lgeT6fFcKLffriW+7h4Rgx5py4g==",
+    "CP.Shared.Primitives/0.1.43": {
+      "sha512": "4KXjgOOepvIBAKpIWPVEFkc8jxa/XyiLf6pi6ys97o3PDvz3I0WygJa4HQISsLo7qEFee51j4+MeEmI7hCZbhg==",
       "type": "package",
-      "path": "cp.shared.primitives/0.1.41",
+      "path": "cp.shared.primitives/0.1.43",
       "files": [
         ".nupkg.metadata",
-        "cp.shared.primitives.0.1.41.nupkg.sha512",
+        "cp.shared.primitives.0.1.43.nupkg.sha512",
         "cp.shared.primitives.nuspec",
         "lib/netstandard2.1/CP.Shared.Primitives.dll"
       ]
@@ -1267,7 +1267,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
-      "CP.Client.Core >= 0.1.44",
+      "CP.Client.Core >= 0.1.46",
       "FluentAssertions >= 8.8.0",
       "Microsoft.Extensions.DependencyInjection >= 10.0.2",
       "Microsoft.Extensions.Logging >= 10.0.2",
@@ -1332,7 +1332,7 @@
         "dependencies": {
           "CP.Client.Core": {
             "target": "Package",
-            "version": "[0.1.44, )"
+            "version": "[0.1.46, )"
           },
           "FluentAssertions": {
             "target": "Package",

@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "IETddsrM3lc=",
+  "dgSpecHash": "8n87cUb/02w=",
   "success": true,
   "projectFilePath": "C:\\Users\\benho\\source\\repos\\ReleaseConsole\\ReleaseConsole\\ReleaseConsole.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\benho\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\0.1.44\\cp.client.core.0.1.44.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\0.1.41\\cp.shared.primitives.0.1.41.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\0.1.46\\cp.client.core.0.1.46.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\0.1.43\\cp.shared.primitives.0.1.43.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\fluentassertions\\8.8.0\\fluentassertions.8.8.0.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.2\\microsoft.extensions.configuration.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.2\\microsoft.extensions.configuration.abstractions.10.0.2.nupkg.sha512",

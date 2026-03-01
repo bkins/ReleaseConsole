@@ -11,7 +11,6 @@ using System.CommandLine;
 using System.Diagnostics;
 using System.Reflection;
 using CP.Client.Core.Avails;
-using CP.Client.Core.Common.ConectivityToApi;
 using ReleaseConsole.Core.Spinners;
 using ReleaseConsole.Menu;
 using ReleaseConsole.Services.Interfaces;

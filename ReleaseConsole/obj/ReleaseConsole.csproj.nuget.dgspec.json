@@ -54,7 +54,7 @@
           "dependencies": {
             "CP.Client.Core": {
               "target": "Package",
-              "version": "[0.1.44, )"
+              "version": "[0.1.46, )"
             },
             "FluentAssertions": {
               "target": "Package",
