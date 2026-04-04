@@ -163,7 +163,7 @@ public class Program
         StartApi(environment);
         await WaitForApiReady(environment);
         
-        OpenScalar(environment);
+        // OpenScalar(environment);
 
         PauseForUser();
     }

@@ -5,6 +5,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <ApplicationIcon>appicon_background.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,6 +36,13 @@
       <None Update="Scripts\publish-local-nuget.ps1">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="appicon_background.ico" />
+      <Resource Include="appicon_background.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 
 </Project>

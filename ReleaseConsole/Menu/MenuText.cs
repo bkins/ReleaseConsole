@@ -40,7 +40,7 @@ public static class MenuText
                                                           , Color.Cyan1
                                                           , statusTemplate: "Deploying {0} to {1}...");
 
-        public static readonly UiText VerifyEnvironment = new(label: "✅  Verify Environment"
+        public static readonly UiText VerifyEnvironment = new(label: "✅ Verify Environment"
                                                             , panelTitle: "[green]VERIFY ENVIRONMENT[/]"
                                                             , Color.Cyan1
                                                             , statusTemplate: "Verifying {0} environment...");
@@ -58,7 +58,7 @@ public static class MenuText
                                                         , panelTitle: "[cyan]LIST ARTIFACTS[/]"
                                                         , Color.Cyan1);
 
-        public static readonly UiText LaunchScalar = new(label: "🧭 Start API & Open Scalar..."
+        public static readonly UiText LaunchScalar = new(label: "🧭 Start API..."
                                                        , panelTitle: "[cyan]Scalar[/]"
                                                        , Color.Cyan1);
     }
