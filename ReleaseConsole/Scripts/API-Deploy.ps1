@@ -75,10 +75,19 @@ if (Test-Path $deployPath) {
     Copy-Item -Path $deployPath -Destination $backupPath -Recurse -Force
 }
 
-# Create deployment directory
+# Create deployment directory.
+# IMPORTANT: Use -Force to ensure the directory exists, but do NOT use
+# Remove-Item / rmdir before this line. The live database lives at:
+#   $deployPath\Data\{Environment}\platform.db
+# That file is created at runtime and is NOT part of the build artifact.
+# A clean-wipe of $deployPath before copying would permanently destroy
+# production data. Add the directory, then copy over it.
 New-Item -ItemType Directory -Path $deployPath -Force | Out-Null
 
-# Copy artifact
+# Copy artifact.
+# Copy-Item only touches files present in $SourcePath. Because platform.db
+# is not produced by dotnet publish, it will never be in the artifact and
+# will never be overwritten by this step.
 Write-Host "Copying artifact files..."
 Copy-Item -Path "$SourcePath\*" -Destination $deployPath -Recurse -Force
 
