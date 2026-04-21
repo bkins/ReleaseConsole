@@ -76,12 +76,16 @@ if (Test-Path $deployPath) {
 }
 
 # Create deployment directory.
-# IMPORTANT: Use -Force to ensure the directory exists, but do NOT use
-# Remove-Item / rmdir before this line. The live database lives at:
-#   $deployPath\Data\{Environment}\platform.db
-# That file is created at runtime and is NOT part of the build artifact.
-# A clean-wipe of $deployPath before copying would permanently destroy
-# production data. Add the directory, then copy over it.
+# ADM-05: The live database now lives OUTSIDE the deploy tree at:
+#   C:\CP\Data\{AspNetCoreEnvironment}\platform.db
+# e.g. C:\CP\Data\Development\platform.db  (DEV)
+#      C:\CP\Data\QA\platform.db            (QA)
+#      C:\CP\Data\Prod\platform.db          (PROD)
+#
+# The path is set in Program.cs BuildDataPersistenceLayer and is
+# independent of $deployPath. This means a clean-wipe of $deployPath
+# (Remove-Item $deployPath -Recurse -Force) is now safe to perform
+# before deploying — the database will never be touched.
 New-Item -ItemType Directory -Path $deployPath -Force | Out-Null
 
 # Copy artifact.
