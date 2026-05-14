@@ -26,6 +26,8 @@ public static class MenuText
         public const string SelectComponent   = "[cyan]Select component:[/]";
         public const string SelectEnvironment = "[cyan]Select environment:[/]";
         public const string SelectVersion     = "[cyan]Select version:[/]";
+        public const string SelectDbAction    = "[cyan]Select DB action:[/]";
+        public const string EnterScriptPath   = "[cyan]Enter script path:[/]";
     }
 
     public static class Commands
@@ -40,7 +42,7 @@ public static class MenuText
                                                           , Color.Cyan1
                                                           , statusTemplate: "Deploying {0} to {1}...");
 
-        public static readonly UiText VerifyEnvironment = new(label: "✅ Verify Environment"
+        public static readonly UiText VerifyEnvironment = new(label: "✅  Verify Environment"
                                                             , panelTitle: "[green]VERIFY ENVIRONMENT[/]"
                                                             , Color.Cyan1
                                                             , statusTemplate: "Verifying {0} environment...");
@@ -60,6 +62,10 @@ public static class MenuText
 
         public static readonly UiText LaunchScalar = new(label: "🧭 Start API..."
                                                        , panelTitle: "[cyan]Scalar[/]"
+                                                       , Color.Cyan1);
+        //☁️🔢🔄
+        public static readonly UiText DbAction = new(label: "🔄 DB Actions..."
+                                                       , panelTitle: "[cyan]DB Swap & Retore[/]"
                                                        , Color.Cyan1);
     }
 
@@ -83,5 +89,18 @@ public static class MenuText
     {
         public const string Success = "✅  SUCCESS ";
         public const string Failure = "⛔  FAILURE";
+    }
+
+    public static class DbActions
+    {//️⬆️️️️🔁 '⬆️️️️', '️️️️️️️️️️️️️️️️️️️️⬆️️️️', '⬆'
+        public const string SwapDb = "⬆️ Prod to Dev";
+        public const string RestoreDb = "🔁 Restore Dev";
+        
+        /*
+         * Visible	Internal
+⬆	base symbol only
+⬆️	base symbol + emoji style
+⬆️️️️	base symbol + redundant invisible modifiers
+         */
     }
 }

@@ -4,10 +4,10 @@ namespace ReleaseConsole.Menu;
 
 public sealed class UiText
 {
-    public        string                 Label          { get; }
-    public        string                 PanelTitle     { get; }
-    public        string?                StatusTemplate { get; }
-    public        Color Color          { get; }
+    public string  Label          { get; }
+    public string  PanelTitle     { get; }
+    public string? StatusTemplate { get; }
+    public Color   Color          { get; }
 
     public UiText(string label, string panelTitle, Color color, string? statusTemplate = null)
     {

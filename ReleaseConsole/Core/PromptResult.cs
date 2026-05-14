@@ -14,9 +14,7 @@ public sealed record PromptResult<T>
     public bool IsBack     => Kind == PromptResultKind.Back;
     public bool IsSelected => Kind == PromptResultKind.Selected;
 
-    public static PromptResult<T> Back() 
-        => new(PromptResultKind.Back, default);
+    public static PromptResult<T> Back() => new(PromptResultKind.Back, default);
 
-    public static PromptResult<T> Selected(T value) 
-        => new(PromptResultKind.Selected, value);
+    public static PromptResult<T> Selected(T value) => new(PromptResultKind.Selected, value);
 }

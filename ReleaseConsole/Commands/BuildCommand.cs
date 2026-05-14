@@ -476,7 +476,4 @@ public sealed class BuildCommand : CommandBaseCommand
             return "unknown";
         }
     }
-
-    private static string GetDefaultScriptsPath() => 
-        Path.Combine(System.Environment.CurrentDirectory, "scripts");
 }

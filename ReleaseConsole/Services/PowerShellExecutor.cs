@@ -20,14 +20,6 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
                                                           , Dictionary<string, string>? parameters = null
                                                           , CancellationToken           ct         = default )
     {
-        if (File.Exists(scriptPath).Not())
-        {
-            return new PowerShellResult(false
-                                      , string.Empty
-                                      , $"Script not found: {scriptPath}"
-                                      , -1);
-        }
-
         var arguments = string.Empty;
 
         switch (component)
@@ -52,6 +44,10 @@ public sealed class PowerShellExecutor : IPowerShellExecutor
                 arguments = args.ToString();
                 break;
             }
+            case null:
+                arguments = new StringBuilder($"-NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{scriptPath}\"").ToString();
+                
+                break;
         }
 
         var startInfo = new ProcessStartInfo

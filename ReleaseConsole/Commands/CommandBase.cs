@@ -82,6 +82,9 @@ public abstract class CommandBaseCommand : ICommand, ILogger
         throw new NotImplementedException();
     }
 
+    public static string GetDefaultScriptsPath() => 
+            Path.Combine(System.Environment.CurrentDirectory, "scripts");
+    
     public bool IsEnabled( LogLevel logLevel ) => throw new NotImplementedException();
 
     public IDisposable? BeginScope<TState>( TState state ) where TState : notnull => throw new NotImplementedException();
