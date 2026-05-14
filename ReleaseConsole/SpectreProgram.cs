@@ -14,13 +14,16 @@ using CP.Client.Core.Avails;
 using ReleaseConsole.Core.Spinners;
 using ReleaseConsole.Menu;
 using ReleaseConsole.Services.Interfaces;
+using static ReleaseConsole.Menu.MenuText;
+using static ReleaseConsole.Menu.MenuText.Commands;
 using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole;
 
 public class Program
 {
-    private static ServiceProvider? _serviceProvider;
+    private static          ServiceProvider? _serviceProvider;
+    private static readonly HttpClient       HttpClient = new();
 
     private const string ScriptFolder = @"C:\CP\Deploy\Api\";
     private const string ScriptFileName = "start-api.bat";
@@ -51,7 +54,7 @@ public class Program
     private static PromptResult<T> PromptOrBack<T>( string                       title
                                                   , IEnumerable<PromptOption<T>> options )
     {
-        var backOption = new PromptOption<T>(MenuText.Navigation.Back, default!, true);
+        var backOption = new PromptOption<T>(Navigation.Back, default!, true);
 
         var allOptions = options.Append(backOption).ToList();
         var prompt = new SelectionPrompt<PromptOption<T>>().Title(title)
@@ -109,48 +112,83 @@ public class Program
         {
             AnsiConsole.Clear();
 
-            var header = new FigletText(MenuText.Header.Title).LeftJustified()
+            var header = new FigletText(Header.Title).LeftJustified()
                                                               .Color(Color.Cyan1);
 
             AnsiConsole.Write(header);
-            AnsiConsole.MarkupLine(MenuText.Header.Subtitle + "\n");
+            AnsiConsole.MarkupLine(Header.Subtitle + "\n");
 
             var menu = new ConsoleMenu
                        {
-                               Title = MenuText.MainMenuTitle
-                             , Hint  = MenuText.Navigation.MoreChoicesHint
+                               Title = MainMenuTitle
+                             , Hint  = Navigation.MoreChoicesHint
                        }
-                       .Add(MenuText.Commands.BuildComponent.Label
-                          , HandleBuildAsync)
-                       .Add(MenuText.Commands.DeployComponent.Label
-                          , HandleDeployAsync)
-                       .Add(MenuText.Commands.VerifyEnvironment.Label
-                          , HandleVerifyAsync)
-                       .Add(MenuText.Commands.ViewAuditLogs.Label
-                          , HandleViewAuditLogsAsync)
-                       .Add(MenuText.Commands.ListArtifacts.Label
-                          , HandleListArtifactsAsync)
-                       .Add(MenuText.Commands.LaunchScalar.Label
-                            , HandleLaunchScalar)
-                       .AddExit(MenuText.Navigation.Exit);
+                      .Add(BuildComponent.Label
+                         , HandleBuildAsync)
+                      .Add(DeployComponent.Label
+                         , HandleDeployAsync)
+                      .Add(VerifyEnvironment.Label
+                         , HandleVerifyAsync)
+                      .Add(ViewAuditLogs.Label
+                         , HandleViewAuditLogsAsync)
+                      .Add(ListArtifacts.Label
+                         , HandleListArtifactsAsync)
+                      .Add(LaunchScalar.Label
+                         , HandleLaunchScalar)
+                      .Add(DbAction.Label
+                         , HandleDbActionsAsync)
+                      .AddExit(Navigation.Exit);
 
             var result = await menu.ShowAsync();
 
             if (result != MenuResult.Exit) continue;
 
-            AnsiConsole.MarkupLine(MenuText.Navigation.Goodby);
+            AnsiConsole.MarkupLine(Navigation.Goodby);
 
             return 0;
         }
     }
 
+    private static async Task HandleDbActionsAsync()
+    {
+        var panel = new Panel(DbAction.PanelTitle).BorderColor(DbAction.Color);
+        
+        AnsiConsole.Write(panel);
+        AnsiConsole.WriteLine();
+
+        if (TrySelect(PromptForDbAction(), out var action).Not()) { return; }
+
+        var swapDbCommand = new SwapDbCommand(_serviceProvider!.GetRequiredService<IAuditLog>()
+                                            , _serviceProvider!.GetRequiredService<ILogger<BuildCommand>>()
+                                            , _serviceProvider!.GetRequiredService<IPowerShellExecutor>()
+                                            , action);
+        
+        var result = await RunWithSpinnerAsync(swapDbCommand.SpinnerText
+                                             , swapDbCommand.ExecuteAsync
+                                             , swapDbCommand.SpinnerColor);
+
+        DisplayResult(result);
+        
+        PauseForUser();
+    }
+
+    private static PromptResult<string> PromptForDbAction()
+    {
+
+        var options = new List<PromptOption<string>>
+                      {
+                              new(DbActions.SwapDb
+                                , DbActions.SwapDb)
+                            , new(DbActions.RestoreDb
+                                , DbActions.RestoreDb)
+                      };
+
+        return PromptOrBack(Prompts.SelectDbAction, options);
+    }
+
     private static async Task HandleLaunchScalar()
     {
-        var panel = new Panel(MenuText.Commands
-                                      .LaunchScalar
-                                      .PanelTitle).BorderColor(MenuText.Commands
-                                                                       .LaunchScalar
-                                                                       .Color);
+        var panel = new Panel(LaunchScalar.PanelTitle).BorderColor(LaunchScalar.Color);
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
@@ -233,14 +271,12 @@ public class Program
     private static async Task WaitForApiReady(Environment environment)
     {
         var healthEndpoint = ApiEnvironments.Url(environment) + "/Scalar";
-    
-        using var httpClient = new HttpClient();
-    
+
         while (true)
         {
             try
             {
-                var response = await httpClient.GetAsync(healthEndpoint);
+                var response = await HttpClient.GetAsync(healthEndpoint);
                 if (response.IsSuccessStatusCode) return;
             }
             catch
@@ -260,7 +296,7 @@ public class Program
     
     private static async Task HandleBuildAsync()
     {
-        var panel = new Panel(MenuText.Commands.BuildComponent.Label).BorderColor(Color.Cyan1);
+        var panel = new Panel(BuildComponent.Label).BorderColor(Color.Cyan1);
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
@@ -289,7 +325,7 @@ public class Program
 
     private static async Task HandleDeployAsync()
     {
-        var panel = new Panel(MenuText.Commands.DeployComponent.Label).BorderColor(Color.Yellow);
+        var panel = new Panel(DeployComponent.Label).BorderColor(Color.Yellow);
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
@@ -328,7 +364,7 @@ public class Program
 
     private static async Task HandleVerifyAsync()
     {
-        var panel = new Panel(MenuText.Commands.VerifyEnvironment.Label).BorderColor(Color.Green);
+        var panel = new Panel(VerifyEnvironment.Label).BorderColor(Color.Green);
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
 
@@ -399,7 +435,7 @@ public class Program
 
     private static async Task HandleListArtifactsAsync()
     {
-        var panel = new Panel(MenuText.Commands.ListArtifacts.Label).BorderColor(Color.Cyan1);
+        var panel = new Panel(ListArtifacts.Label).BorderColor(Color.Cyan1);
 
         AnsiConsole.Write(panel);
         AnsiConsole.WriteLine();
@@ -456,17 +492,32 @@ public class Program
         return envColorTuple;
     }
 
+    
+    private static PromptResult<string> PromptForScriptPath()
+    {
+        var prompt = new TextPrompt<string>(Prompts.EnterScriptPath)
+                     .Validate(path =>
+                     {
+                         return File.Exists(path)
+                                ? ValidationResult.Success()
+                                : ValidationResult.Error($"File not found: {path}");
+                     });
+
+        var path = AnsiConsole.Prompt(prompt);
+        return PromptResult<string>.Selected(path);
+    }
+    
     private static PromptResult<Component> PromptForComponent( bool isDeploy = false )
     {
         var options = new List<PromptOption<Component>>
                       {
-                              new(MenuText.ComponentMenu.Api
+                              new(ComponentMenu.Api
                                 , Component.CpApi)
-                            , new(MenuText.ComponentMenu.LocalAiAssistant
+                            , new(ComponentMenu.LocalAiAssistant
                                 , Component.LaaMauiApp)
                       };
 
-        if (!isDeploy)
+        if (isDeploy.Not())
         {
             options.AddRange(new[]
                              {
@@ -475,7 +526,7 @@ public class Program
                              });
         }
 
-        return PromptOrBack(MenuText.Prompts.SelectComponent
+        return PromptOrBack(Prompts.SelectComponent
                           , options);
     }
 
@@ -484,15 +535,15 @@ public class Program
     {
         var options = new List<PromptOption<Environment>>
                       {
-                              new(MenuText.Environments.Dev, Environment.Dev),
-                              new(MenuText.Environments.Qa, Environment.Qa)
+                              new(Environments.Dev, Environment.Dev),
+                              new(Environments.Qa, Environment.Qa)
                       };
 
         if (allowProd)
-            options.Add(new PromptOption<Environment>(MenuText.Environments.Prod
+            options.Add(new PromptOption<Environment>(Environments.Prod
                                                     , Environment.Prod));
 
-        return PromptOrBack(MenuText.Prompts.SelectEnvironment, options);
+        return PromptOrBack(Prompts.SelectEnvironment, options);
     }
 
     
@@ -509,14 +560,14 @@ public class Program
         var options = availableArtifacts.Select(artifact => new PromptOption<Artifact>($"{artifact.Version} - {artifact.Metadata.BuiltFor}"
                                                                                      , artifact)).ToList();
 
-        return PromptOrBack(MenuText.Prompts.SelectVersion
+        return PromptOrBack(Prompts.SelectVersion
                           , options);
     }
 
     private static void PauseForUser()
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.Markup(MenuText.Navigation.PressAnyKey);
+        AnsiConsole.Markup(Navigation.PressAnyKey);
 
         Console.ReadKey(true);
     }
@@ -528,7 +579,7 @@ public class Program
 
         if (result.Success)
         {
-            var successPanel = new Panel($"[green]{MenuText.Results.Success} [/]\n\n{result.Message.EscapeMarkup()}").BorderColor(Color.Green);
+            var successPanel = new Panel($"[green]{Results.Success} [/]\n\n{result.Message.EscapeMarkup()}").BorderColor(Color.Green);
             AnsiConsole.Write(successPanel);
         }
         else
@@ -537,7 +588,7 @@ public class Program
                                          ? $"\n\n{result.Message.EscapeMarkup()}"
                                          : string.Empty;
 
-            var failurePanel = new Panel($"[red]{MenuText.Results.Failure}[/]{innerPanelText}").BorderColor(Color.Red);
+            var failurePanel = new Panel($"[red]{Results.Failure}[/]{innerPanelText}").BorderColor(Color.Red);
                                                                                               // .Padding(1, 1);
             AnsiConsole.Write(failurePanel);
 
@@ -555,8 +606,8 @@ public class Program
     {
         Console.WriteLine();
         Console.WriteLine(result.Success
-                                  ? MenuText.Results.Success
-                                  : MenuText.Results.Failure);
+                                  ? Results.Success
+                                  : Results.Failure);
         Console.WriteLine(result.Message);
 
         if (result.ErrorDetails?.HasValue() ?? false)
