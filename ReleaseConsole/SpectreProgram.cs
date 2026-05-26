@@ -4,7 +4,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReleaseConsole.Commands;
+using ReleaseConsole.ConsoleUi;
 using ReleaseConsole.Core;
+using ReleaseConsole.MenuActions;
 using ReleaseConsole.Services;
 using Spectre.Console;
 using System.CommandLine;
@@ -22,8 +24,9 @@ namespace ReleaseConsole;
 
 public class Program
 {
-    private static          ServiceProvider? _serviceProvider;
-    private static readonly HttpClient       HttpClient = new();
+    private static ServiceProvider? _serviceProvider;
+
+    private static readonly HttpClient HttpClient = new();
 
     private const string ScriptFolder = @"C:\CP\Deploy\Api\";
     private const string ScriptFileName = "start-api.bat";
@@ -128,7 +131,7 @@ public class Program
                       .Add(DeployComponent.Label
                          , HandleDeployAsync)
                       .Add(VerifyEnvironment.Label
-                         , HandleVerifyAsync)
+                         , () => _serviceProvider!.GetRequiredService<VerifyEnvironmentMenuAction>().ExecuteAsync())
                       .Add(ViewAuditLogs.Label
                          , HandleViewAuditLogsAsync)
                       .Add(ListArtifacts.Label
@@ -149,12 +152,15 @@ public class Program
         }
     }
 
+    private static void WritePanel( string panelTitle, Color borderColor )
+    {
+        AnsiConsole.Write(new Panel(panelTitle).BorderColor(borderColor));
+        AnsiConsole.WriteLine();
+    }
+    
     private static async Task HandleDbActionsAsync()
     {
-        var panel = new Panel(DbAction.PanelTitle).BorderColor(DbAction.Color);
-        
-        AnsiConsole.Write(panel);
-        AnsiConsole.WriteLine();
+        WritePanel(DbAction.PanelTitle, DbAction.Color);
 
         if (TrySelect(PromptForDbAction(), out var action).Not()) { return; }
 
@@ -362,30 +368,6 @@ public class Program
         PauseForUser();
     }
 
-    private static async Task HandleVerifyAsync()
-    {
-        var panel = new Panel(VerifyEnvironment.Label).BorderColor(Color.Green);
-        AnsiConsole.Write(panel);
-        AnsiConsole.WriteLine();
-
-        if (TrySelect(PromptForEnvironment()
-                    , out var environment).Not())
-            return;
-
-        var verifyCommand = new VerifyCommand(environment
-                                            , _serviceProvider!.GetRequiredService<IAuditLog>()
-                                            , _serviceProvider!.GetRequiredService<ILogger<VerifyCommand>>()
-                                            , _serviceProvider!.GetRequiredService<HttpClient>()
-        );
-
-        var result = await RunWithSpinnerAsync($"Verifying {environment} environment..."
-                                             , () => verifyCommand.ExecuteAsync()
-                                             , Color.Red);
-
-        DisplayResult(result);
-        PauseForUser();
-    }
-    
     private static async Task HandleViewAuditLogsAsync()
     {
         var panel = new Panel("[cyan]RECENT AUDIT LOGS[/]")
@@ -811,6 +793,12 @@ public class Program
         services.AddSingleton<IVersionSelector, ConsoleVersionSelector>();
         services.AddSingleton<IDeploymentStateService, JsonDeploymentStateService>();
         services.AddSingleton<HttpClient>();
+
+        services.AddSingleton<IConsolePromptService, ConsolePromptService>();
+        services.AddSingleton<IConsoleResultRenderer, ConsoleResultRenderer>();
+        services.AddSingleton<IConsolePauseService, ConsolePauseService>();
+        services.AddSingleton<ICommandExecutionPipeline, ConsoleCommandRunner>();
+        services.AddTransient<VerifyEnvironmentMenuAction>();
 
         return services;
     }
