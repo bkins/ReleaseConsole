@@ -28,6 +28,7 @@ public sealed class VerifyEnvironmentMenuAction : ConsoleMenuActionBase
 
     public override string Label => VerifyEnvironment.Label;
     public override string Path  => "verify";
+    public override int    Order => 30;
 
     public override async Task ExecuteAsync()
     {

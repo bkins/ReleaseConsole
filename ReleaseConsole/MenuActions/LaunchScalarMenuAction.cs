@@ -27,6 +27,7 @@ public sealed class LaunchScalarMenuAction : ConsoleMenuActionBase
 
     public override string Label => LaunchScalar.Label;
     public override string Path  => "scalar";
+    public override int    Order => 60;
 
     public override async Task ExecuteAsync()
     {

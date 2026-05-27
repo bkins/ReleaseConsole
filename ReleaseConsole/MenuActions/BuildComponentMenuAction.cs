@@ -20,6 +20,7 @@ public sealed class BuildComponentMenuAction : ConsoleMenuActionBase
 
     public override string Label => BuildComponent.Label;
     public override string Path  => "build";
+    public override int    Order => 10;
 
     public override async Task ExecuteAsync()
     {
