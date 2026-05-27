@@ -10,16 +10,13 @@ using static ReleaseConsole.Menu.MenuText.Commands;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "deploy", label: "🚀 Deploy Component", Order = 20)]
 public sealed class DeployComponentMenuAction : ConsoleMenuActionBase
 {
     public DeployComponentMenuAction( IConsolePromptService     prompts
                                     , ICommandExecutionPipeline runner
                                     , IServiceProvider          services )
         : base(prompts, runner, services) { }
-
-    public override string Label => DeployComponent.Label;
-    public override string Path  => "deploy";
-    public override int    Order => 20;
 
     public override async Task ExecuteAsync()
     {

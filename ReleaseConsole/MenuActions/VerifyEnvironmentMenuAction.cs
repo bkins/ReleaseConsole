@@ -10,6 +10,7 @@ using static ReleaseConsole.Menu.MenuText.Commands;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "verify", label: "✅  Verify Environment", Order = 30)]
 public sealed class VerifyEnvironmentMenuAction : ConsoleMenuActionBase
 {
     private readonly ILogger<VerifyEnvironmentMenuAction> _logger;
@@ -25,10 +26,6 @@ public sealed class VerifyEnvironmentMenuAction : ConsoleMenuActionBase
         _logger     = logger;
         _httpClient = httpClient;
     }
-
-    public override string Label => VerifyEnvironment.Label;
-    public override string Path  => "verify";
-    public override int    Order => 30;
 
     public override async Task ExecuteAsync()
     {

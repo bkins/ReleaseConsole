@@ -9,6 +9,7 @@ using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "scalar", label: "🧭 Start API...", Order = 60)]
 public sealed class LaunchScalarMenuAction : ConsoleMenuActionBase
 {
     private const string ScriptFolder   = @"C:\CP\Deploy\Api\";
@@ -24,10 +25,6 @@ public sealed class LaunchScalarMenuAction : ConsoleMenuActionBase
     {
         _httpClient = httpClient;
     }
-
-    public override string Label => LaunchScalar.Label;
-    public override string Path  => "scalar";
-    public override int    Order => 60;
 
     public override async Task ExecuteAsync()
     {
