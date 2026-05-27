@@ -82,12 +82,16 @@ public sealed class LaunchScalarMenuAction : ConsoleMenuActionBase
         {
             try
             {
-                var response = await _httpClient.GetAsync(healthEndpoint);
+                // Per-request timeout keeps individual polls fast; without an external
+                // CancellationToken, HttpClient timeouts surface as TaskCanceledException
+                // (a subclass of OperationCanceledException) and are also "not ready yet".
+                using var requestCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var response = await _httpClient.GetAsync(healthEndpoint, requestCts.Token);
                 if (response.IsSuccessStatusCode) return;
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception)
             {
-                // API not ready yet
+                // API not ready yet — connection refused, non-2xx, or per-request timeout
             }
 
             await Task.Delay(TimeSpan.FromSeconds(2));
