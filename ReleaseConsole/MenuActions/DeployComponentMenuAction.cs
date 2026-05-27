@@ -19,6 +19,7 @@ public sealed class DeployComponentMenuAction : ConsoleMenuActionBase
 
     public override string Label => DeployComponent.Label;
     public override string Path  => "deploy";
+    public override int    Order => 20;
 
     public override async Task ExecuteAsync()
     {

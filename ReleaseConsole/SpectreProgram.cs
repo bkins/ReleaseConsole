@@ -6,12 +6,10 @@ using ReleaseConsole.ConsoleUi;
 using ReleaseConsole.Core;
 using ReleaseConsole.Core.Spinners;
 using ReleaseConsole.Menu;
-using ReleaseConsole.MenuActions;
 using ReleaseConsole.Services;
 using ReleaseConsole.Services.Interfaces;
 using Spectre.Console;
 using System.CommandLine;
-using System.Reflection;
 using static ReleaseConsole.Menu.MenuText;
 using static ReleaseConsole.Menu.MenuText.Commands;
 using Environment = ReleaseConsole.Core.Environment;
@@ -20,51 +18,20 @@ namespace ReleaseConsole;
 
 public class Program
 {
-    private static ServiceProvider? _serviceProvider;
-
     public static async Task<int> Main( string[] args )
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        var services = ConfigureServices();
-        _serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = ConfigureServices().BuildServiceProvider();
 
         if (args.Length == 0)
-            return await RunSpectreMenuAsync();
+            return await RunSpectreMenuAsync(serviceProvider);
 
-        var rootCommand = BuildRootCommand(_serviceProvider);
+        var rootCommand = BuildRootCommand(serviceProvider);
         return await rootCommand.InvokeAsync(args);
     }
 
-    public static async Task<T> RunWithSpinnerAsync<T>( string        message
-                                                      , Func<Task<T>> action
-                                                      , Color?        color = null )
-    {
-        return await AnsiConsole.Status()
-                                .Spinner(Spinner.Known.Dots)
-                                .SpinnerStyle(color ?? Color.White)
-                                .StartAsync(message, async _ => await action());
-    }
-
-    public static async Task<T> RunWithSpinnerAsync<T>( string                        message
-                                                      , Func<Action<string>, Task<T>> action
-                                                      , Color?                        color         = null
-                                                      , string                        messageSuffix = "" )
-    {
-        var suffix = messageSuffix.HasValue() ? $" - {messageSuffix}" : message;
-
-        return await AnsiConsole.Status()
-                                .Spinner(new CaseSwappingSpinner(message))
-                                .SpinnerStyle(color ?? Color.White)
-                                .StartAsync(suffix
-                                          , async ctx =>
-                                            {
-                                                void Report(string text) => ctx.Status(text);
-                                                return await action(Report);
-                                            });
-    }
-
-    private static async Task<int> RunSpectreMenuAsync()
+    private static async Task<int> RunSpectreMenuAsync( IServiceProvider serviceProvider )
     {
         while (true)
         {
@@ -73,26 +40,20 @@ public class Program
             AnsiConsole.Write(new FigletText(Header.Title).LeftJustified().Color(Color.Cyan1));
             AnsiConsole.MarkupLine(Header.Subtitle + "\n");
 
+            var actions = serviceProvider.GetServices<IMenuAction>()
+                                         .OrderBy(action => action.Order)
+                                         .ToList();
+
             var menu = new ConsoleMenu
                        {
                                Title = MainMenuTitle
                              , Hint  = Navigation.MoreChoicesHint
-                       }
-                      .Add(BuildComponent.Label
-                         , () => _serviceProvider!.GetRequiredService<BuildComponentMenuAction>().ExecuteAsync())
-                      .Add(DeployComponent.Label
-                         , () => _serviceProvider!.GetRequiredService<DeployComponentMenuAction>().ExecuteAsync())
-                      .Add(VerifyEnvironment.Label
-                         , () => _serviceProvider!.GetRequiredService<VerifyEnvironmentMenuAction>().ExecuteAsync())
-                      .Add(ViewAuditLogs.Label
-                         , () => _serviceProvider!.GetRequiredService<ViewAuditLogsMenuAction>().ExecuteAsync())
-                      .Add(ListArtifacts.Label
-                         , () => _serviceProvider!.GetRequiredService<ListArtifactsMenuAction>().ExecuteAsync())
-                      .Add(LaunchScalar.Label
-                         , () => _serviceProvider!.GetRequiredService<LaunchScalarMenuAction>().ExecuteAsync())
-                      .Add(DbAction.Label
-                         , () => _serviceProvider!.GetRequiredService<DbActionsMenuAction>().ExecuteAsync())
-                      .AddExit(Navigation.Exit);
+                       };
+
+            foreach (var action in actions)
+                menu.Add(action.Label, action.ExecuteAsync);
+
+            menu.AddExit(Navigation.Exit);
 
             var result = await menu.ShowAsync();
 
@@ -273,45 +234,8 @@ public class Program
         services.AddSingleton<IConsolePauseService, ConsolePauseService>();
         services.AddSingleton<ICommandExecutionPipeline, ConsoleCommandRunner>();
 
-        services.AddTransient<BuildComponentMenuAction>();
-        services.AddTransient<DeployComponentMenuAction>();
-        services.AddTransient<VerifyEnvironmentMenuAction>();
-        services.AddTransient<ViewAuditLogsMenuAction>();
-        services.AddTransient<ListArtifactsMenuAction>();
-        services.AddTransient<LaunchScalarMenuAction>();
-        services.AddTransient<DbActionsMenuAction>();
+        services.AddMenuActions();
 
         return services;
-    }
-
-    public static async Task ShowAllSpinnersAsync()
-    {
-        var knownSpinners = typeof(Spinner.Known).GetProperties(BindingFlags.Public | BindingFlags.Static)
-                                                 .Where(propertyInfo => propertyInfo.PropertyType == typeof(Spinner))
-                                                 .Select(propertyInfo => new
-                                                                         {
-                                                                                 Name    = propertyInfo.Name
-                                                                               , Spinner = (Spinner)propertyInfo.GetValue(null)!
-                                                                         });
-
-        var custom = new
-                     {
-                             Name    = "CustomCaseSwapper"
-                           , Spinner = (Spinner)new CaseSwappingSpinner("Thinking")
-                     };
-
-        var allSpinners = new[] { custom }.Concat(knownSpinners);
-
-        foreach (var item in allSpinners)
-        {
-            await AnsiConsole.Status()
-                             .Spinner(item.Spinner)
-                             .SpinnerStyle(Style.Parse("cyan"))
-                             .StartAsync($"Spinner: {item.Name.EscapeMarkup()}"
-                                       , async _ => await Task.Delay(20000));
-        }
-
-        AnsiConsole.MarkupLine("\n[grey]Done previewing spinners. Press any key…[/]");
-        Console.ReadKey();
     }
 }

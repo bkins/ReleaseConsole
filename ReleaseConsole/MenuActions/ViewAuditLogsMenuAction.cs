@@ -17,6 +17,7 @@ public sealed class ViewAuditLogsMenuAction : ConsoleMenuActionBase
 
     public override string Label => ViewAuditLogs.Label;
     public override string Path  => "audit";
+    public override int    Order => 40;
 
     public override async Task ExecuteAsync()
     {

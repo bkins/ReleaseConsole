@@ -18,6 +18,7 @@ public sealed class DbActionsMenuAction : ConsoleMenuActionBase
 
     public override string Label => DbAction.Label;
     public override string Path  => "db";
+    public override int    Order => 70;
 
     public override async Task ExecuteAsync()
     {

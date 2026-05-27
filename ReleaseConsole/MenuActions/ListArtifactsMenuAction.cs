@@ -19,6 +19,7 @@ public sealed class ListArtifactsMenuAction : ConsoleMenuActionBase
 
     public override string Label => ListArtifacts.Label;
     public override string Path  => "artifacts";
+    public override int    Order => 50;
 
     public override async Task ExecuteAsync()
     {
