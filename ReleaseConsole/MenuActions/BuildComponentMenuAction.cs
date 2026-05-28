@@ -11,16 +11,13 @@ using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "build", label: "🔨 Build Component", Order = 10)]
 public sealed class BuildComponentMenuAction : ConsoleMenuActionBase
 {
     public BuildComponentMenuAction( IConsolePromptService     prompts
                                    , ICommandExecutionPipeline runner
                                    , IServiceProvider          services )
         : base(prompts, runner, services) { }
-
-    public override string Label => BuildComponent.Label;
-    public override string Path  => "build";
-    public override int    Order => 10;
 
     public override async Task ExecuteAsync()
     {

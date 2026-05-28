@@ -10,16 +10,13 @@ using Environment = ReleaseConsole.Core.Environment;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "artifacts", label: "📦 List Artifacts", Order = 50)]
 public sealed class ListArtifactsMenuAction : ConsoleMenuActionBase
 {
     public ListArtifactsMenuAction( IConsolePromptService     prompts
                                   , ICommandExecutionPipeline runner
                                   , IServiceProvider          services )
         : base(prompts, runner, services) { }
-
-    public override string Label => ListArtifacts.Label;
-    public override string Path  => "artifacts";
-    public override int    Order => 50;
 
     public override async Task ExecuteAsync()
     {

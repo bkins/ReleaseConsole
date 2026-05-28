@@ -8,16 +8,13 @@ using static ReleaseConsole.Menu.MenuText.Commands;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "audit", label: "📋 View Audit Logs", Order = 40)]
 public sealed class ViewAuditLogsMenuAction : ConsoleMenuActionBase
 {
     public ViewAuditLogsMenuAction( IConsolePromptService     prompts
                                   , ICommandExecutionPipeline runner
                                   , IServiceProvider          services )
         : base(prompts, runner, services) { }
-
-    public override string Label => ViewAuditLogs.Label;
-    public override string Path  => "audit";
-    public override int    Order => 40;
 
     public override async Task ExecuteAsync()
     {

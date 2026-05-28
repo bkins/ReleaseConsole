@@ -9,16 +9,13 @@ using static ReleaseConsole.Menu.MenuText.Commands;
 
 namespace ReleaseConsole.MenuActions;
 
+[MenuAction(path: "db", label: "🔄 DB Actions...", Order = 70)]
 public sealed class DbActionsMenuAction : ConsoleMenuActionBase
 {
     public DbActionsMenuAction( IConsolePromptService     prompts
                               , ICommandExecutionPipeline runner
                               , IServiceProvider          services )
         : base(prompts, runner, services) { }
-
-    public override string Label => DbAction.Label;
-    public override string Path  => "db";
-    public override int    Order => 70;
 
     public override async Task ExecuteAsync()
     {
