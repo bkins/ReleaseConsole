@@ -20,16 +20,22 @@ public abstract class ConsoleMenuActionBase : IMenuAction
     }
 
     /// <summary>
-    /// Menu item label. Defaults to the value declared on <see cref="MenuActionAttribute"/>.
+    /// Menu item label. Reads from <see cref="MenuActionAttribute"/> by default.
     /// Override only when the label cannot be expressed as a compile-time attribute argument.
+    /// Throws <see cref="InvalidOperationException"/> if neither the attribute nor an override
+    /// provides a value — so the mistake surfaces at first access, not silently as an empty entry.
     /// </summary>
-    public virtual string Label => ResolveAttribute()?.Label ?? string.Empty;
+    public virtual string Label => ResolveAttribute()?.Label
+        ?? throw new InvalidOperationException(MissingAttributeMessage(nameof(Label)));
 
     /// <summary>
     /// Dot/slash-separated path used for future hierarchical menu routing
-    /// (e.g. <c>"db/swap"</c>). Defaults to the value declared on <see cref="MenuActionAttribute"/>.
+    /// (e.g. <c>"db/swap"</c>). Reads from <see cref="MenuActionAttribute"/> by default.
+    /// Throws <see cref="InvalidOperationException"/> if the attribute is absent and no override
+    /// is provided.
     /// </summary>
-    public virtual string Path  => ResolveAttribute()?.Path  ?? string.Empty;
+    public virtual string Path  => ResolveAttribute()?.Path
+        ?? throw new InvalidOperationException(MissingAttributeMessage(nameof(Path)));
 
     /// <summary>
     /// Determines the position of this action in the menu. Lower values appear first.
@@ -54,4 +60,8 @@ public abstract class ConsoleMenuActionBase : IMenuAction
 
     private MenuActionAttribute? ResolveAttribute() =>
         GetType().GetCustomAttribute<MenuActionAttribute>(inherit: false);
+
+    private string MissingAttributeMessage(string propertyName) =>
+        $"{GetType().Name} must be decorated with [{nameof(MenuActionAttribute)}] "
+      + $"or override {propertyName}.";
 }
