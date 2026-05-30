@@ -30,7 +30,7 @@ public sealed class JsonDeploymentStateServiceTests : IDisposable
     public async Task GetCurrentStateAsync_WhenNoStateExists_ReturnsNull()
     {
         // Arrange
-        var component = new Component(ComponentType.Laa, "TestApp", "TestApp");
+        var component = new Component(ComponentType.Laa, "Laa", "TestApp");
 
         // Act
         var result = await _sut.GetCurrentStateAsync(component, Environment.Dev);
@@ -43,7 +43,7 @@ public sealed class JsonDeploymentStateServiceTests : IDisposable
     public async Task SaveStateAsync_ThenGetCurrentStateAsync_ReturnsCorrectState()
     {
         // Arrange
-        var component = new Component(ComponentType.Laa, "TestApp", "TestApp");
+        var component = new Component(ComponentType.Laa, "Laa", "TestApp");
         var expectedState = new DeploymentState(
             ComponentName: "Laa",
             Environment: "Dev",
@@ -70,7 +70,7 @@ public sealed class JsonDeploymentStateServiceTests : IDisposable
     public async Task SaveStateAsync_UpdatesExistingState_WhenCalledTwiceForSameComponentAndEnvironment()
     {
         // Arrange
-        var component = new Component(ComponentType.Laa, "TestApp", "TestApp");
+        var component = new Component(ComponentType.Laa, "Laa", "TestApp");
         var firstState = new DeploymentState(
             ComponentName: "Laa",
             Environment: "Qa",
