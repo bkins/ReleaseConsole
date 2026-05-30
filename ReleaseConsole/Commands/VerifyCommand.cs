@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Moq;
 using ReleaseConsole.Core;
 using ReleaseConsole.Services;
 using ReleaseConsole.Services.Interfaces;
