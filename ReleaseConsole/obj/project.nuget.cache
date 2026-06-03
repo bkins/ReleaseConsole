@@ -1,13 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "8n87cUb/02w=",
+  "dgSpecHash": "ehFXX9SNr6Q=",
   "success": true,
   "projectFilePath": "C:\\Users\\benho\\source\\repos\\ReleaseConsole\\ReleaseConsole\\ReleaseConsole.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\benho\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\0.1.46\\cp.client.core.0.1.46.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\0.1.43\\cp.shared.primitives.0.1.43.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\fluentassertions\\8.8.0\\fluentassertions.8.8.0.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\0.1.47\\cp.client.core.0.1.47.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\0.1.44\\cp.shared.primitives.0.1.44.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.2\\microsoft.extensions.configuration.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.2\\microsoft.extensions.configuration.abstractions.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.2\\microsoft.extensions.configuration.binder.10.0.2.nupkg.sha512",
@@ -20,17 +18,8 @@
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.options\\10.0.2\\microsoft.extensions.options.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.2\\microsoft.extensions.options.configurationextensions.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.2\\microsoft.extensions.primitives.10.0.2.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\moq\\4.20.72\\moq.4.20.72.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\spectre.console\\0.54.0\\spectre.console.0.54.0.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\system.commandline\\2.0.0-beta4.22272.1\\system.commandline.2.0.0-beta4.22272.1.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\system.diagnostics.eventlog\\6.0.0\\system.diagnostics.eventlog.6.0.0.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit\\2.9.3\\xunit.2.9.3.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit.abstractions\\2.0.3\\xunit.abstractions.2.0.3.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit.analyzers\\1.18.0\\xunit.analyzers.1.18.0.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit.assert\\2.9.3\\xunit.assert.2.9.3.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit.core\\2.9.3\\xunit.core.2.9.3.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit.extensibility.core\\2.9.3\\xunit.extensibility.core.2.9.3.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\xunit.extensibility.execution\\2.9.3\\xunit.extensibility.execution.2.9.3.nupkg.sha512"
+    "C:\\Users\\benho\\.nuget\\packages\\system.commandline\\2.0.0-beta4.22272.1\\system.commandline.2.0.0-beta4.22272.1.nupkg.sha512"
   ],
   "logs": []
 }

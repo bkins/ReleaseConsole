@@ -8,55 +8,33 @@
     ".NETCoreApp,Version=v10.0": {
       "ReleaseConsole/1.0.0": {
         "dependencies": {
-          "CP.Client.Core": "0.1.46",
-          "FluentAssertions": "8.8.0",
+          "CP.Client.Core": "0.1.47",
           "Microsoft.Extensions.DependencyInjection": "10.0.2",
           "Microsoft.Extensions.Logging": "10.0.2",
           "Microsoft.Extensions.Logging.Console": "10.0.2",
-          "Moq": "4.20.72",
           "Spectre.Console": "0.54.0",
-          "System.CommandLine": "2.0.0-beta4.22272.1",
-          "xunit": "2.9.3"
+          "System.CommandLine": "2.0.0-beta4.22272.1"
         },
         "runtime": {
           "ReleaseConsole.dll": {}
         }
       },
-      "Castle.Core/5.1.1": {
+      "CP.Client.Core/0.1.47": {
         "dependencies": {
-          "System.Diagnostics.EventLog": "6.0.0"
-        },
-        "runtime": {
-          "lib/net6.0/Castle.Core.dll": {
-            "assemblyVersion": "5.0.0.0",
-            "fileVersion": "5.1.1.0"
-          }
-        }
-      },
-      "CP.Client.Core/0.1.46": {
-        "dependencies": {
-          "CP.Shared.Primitives": "0.1.43"
+          "CP.Shared.Primitives": "0.1.44"
         },
         "runtime": {
           "lib/netstandard2.1/CP.Client.Core.dll": {
-            "assemblyVersion": "0.1.46.0",
-            "fileVersion": "0.1.46.0"
+            "assemblyVersion": "0.1.47.0",
+            "fileVersion": "0.1.47.0"
           }
         }
       },
-      "CP.Shared.Primitives/0.1.43": {
+      "CP.Shared.Primitives/0.1.44": {
         "runtime": {
           "lib/netstandard2.1/CP.Shared.Primitives.dll": {
-            "assemblyVersion": "0.1.43.0",
-            "fileVersion": "0.1.43.0"
-          }
-        }
-      },
-      "FluentAssertions/8.8.0": {
-        "runtime": {
-          "lib/net6.0/FluentAssertions.dll": {
-            "assemblyVersion": "8.8.0.0",
-            "fileVersion": "8.8.0.0"
+            "assemblyVersion": "0.1.44.0",
+            "fileVersion": "0.1.44.0"
           }
         }
       },
@@ -206,17 +184,6 @@
           }
         }
       },
-      "Moq/4.20.72": {
-        "dependencies": {
-          "Castle.Core": "5.1.1"
-        },
-        "runtime": {
-          "lib/net6.0/Moq.dll": {
-            "assemblyVersion": "4.20.72.0",
-            "fileVersion": "4.20.72.0"
-          }
-        }
-      },
       "Spectre.Console/0.54.0": {
         "runtime": {
           "lib/net10.0/Spectre.Console.dll": {
@@ -273,78 +240,6 @@
             "locale": "zh-Hant"
           }
         }
-      },
-      "System.Diagnostics.EventLog/6.0.0": {
-        "runtime": {
-          "lib/net6.0/System.Diagnostics.EventLog.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/net6.0/System.Diagnostics.EventLog.Messages.dll": {
-            "rid": "win",
-            "assetType": "runtime",
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "0.0.0.0"
-          },
-          "runtimes/win/lib/net6.0/System.Diagnostics.EventLog.dll": {
-            "rid": "win",
-            "assetType": "runtime",
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
-          }
-        }
-      },
-      "xunit/2.9.3": {
-        "dependencies": {
-          "xunit.assert": "2.9.3",
-          "xunit.core": "2.9.3"
-        }
-      },
-      "xunit.abstractions/2.0.3": {
-        "runtime": {
-          "lib/netstandard2.0/xunit.abstractions.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.0.0"
-          }
-        }
-      },
-      "xunit.assert/2.9.3": {
-        "runtime": {
-          "lib/net6.0/xunit.assert.dll": {
-            "assemblyVersion": "2.9.3.0",
-            "fileVersion": "2.9.3.0"
-          }
-        }
-      },
-      "xunit.core/2.9.3": {
-        "dependencies": {
-          "xunit.extensibility.core": "2.9.3",
-          "xunit.extensibility.execution": "2.9.3"
-        }
-      },
-      "xunit.extensibility.core/2.9.3": {
-        "dependencies": {
-          "xunit.abstractions": "2.0.3"
-        },
-        "runtime": {
-          "lib/netstandard1.1/xunit.core.dll": {
-            "assemblyVersion": "2.9.3.0",
-            "fileVersion": "2.9.3.0"
-          }
-        }
-      },
-      "xunit.extensibility.execution/2.9.3": {
-        "dependencies": {
-          "xunit.extensibility.core": "2.9.3"
-        },
-        "runtime": {
-          "lib/netstandard1.1/xunit.execution.dotnet.dll": {
-            "assemblyVersion": "2.9.3.0",
-            "fileVersion": "2.9.3.0"
-          }
-        }
       }
     }
   },
@@ -354,33 +249,19 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Castle.Core/5.1.1": {
+    "CP.Client.Core/0.1.47": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-rpYtIczkzGpf+EkZgDr9CClTdemhsrwA/W5hMoPjLkRFnXzH44zDLoovXeKtmxb1ykXK9aJVODSpiJml8CTw2g==",
-      "path": "castle.core/5.1.1",
-      "hashPath": "castle.core.5.1.1.nupkg.sha512"
+      "sha512": "sha512-qEpDAUF6lDbSP6XgtvdkeCqXGvAgMSbSOUlSb1VdDizRMN2DjWf02+Avi91NNk1z+PyypaWe27Z1zjx7NYOnbQ==",
+      "path": "cp.client.core/0.1.47",
+      "hashPath": "cp.client.core.0.1.47.nupkg.sha512"
     },
-    "CP.Client.Core/0.1.46": {
+    "CP.Shared.Primitives/0.1.44": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-w477mglciM2QqCnIke/xaFdensgvI5vxX3eYWRSOuOfUsm5eKDqTN7B/y4GOvo4a1dPKWRhwTFpOQZjueF7xvg==",
-      "path": "cp.client.core/0.1.46",
-      "hashPath": "cp.client.core.0.1.46.nupkg.sha512"
-    },
-    "CP.Shared.Primitives/0.1.43": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-4KXjgOOepvIBAKpIWPVEFkc8jxa/XyiLf6pi6ys97o3PDvz3I0WygJa4HQISsLo7qEFee51j4+MeEmI7hCZbhg==",
-      "path": "cp.shared.primitives/0.1.43",
-      "hashPath": "cp.shared.primitives.0.1.43.nupkg.sha512"
-    },
-    "FluentAssertions/8.8.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-m0kwcqBwvVel03FuMa7Ozo/oTaxYbjeNlcOhQFkyQpwX/8wks6RNl/Jnn58DCZVs6c2oG1RsCZw7HfKSaxLm3w==",
-      "path": "fluentassertions/8.8.0",
-      "hashPath": "fluentassertions.8.8.0.nupkg.sha512"
+      "sha512": "sha512-n9E7yYlskUz2yiWKDpCVUr6hfbKmatv8e/Zs9c8LSOkCgJFQd8eAJO8QKKALg8236czVXRmIyhrJ6t/OMiJsbg==",
+      "path": "cp.shared.primitives/0.1.44",
+      "hashPath": "cp.shared.primitives.0.1.44.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/10.0.2": {
       "type": "package",
@@ -466,13 +347,6 @@
       "path": "microsoft.extensions.primitives/10.0.2",
       "hashPath": "microsoft.extensions.primitives.10.0.2.nupkg.sha512"
     },
-    "Moq/4.20.72": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-EA55cjyNn8eTNWrgrdZJH5QLFp2L43oxl1tlkoYUKIE9pRwL784OWiTXeCV5ApS+AMYEAlt7Fo03A2XfouvHmQ==",
-      "path": "moq/4.20.72",
-      "hashPath": "moq.4.20.72.nupkg.sha512"
-    },
     "Spectre.Console/0.54.0": {
       "type": "package",
       "serviceable": true,
@@ -486,55 +360,6 @@
       "sha512": "sha512-1uqED/q2H0kKoLJ4+hI2iPSBSEdTuhfCYADeJrAqERmiGQ2NNacYKRNEQ+gFbU4glgVyK8rxI+ZOe1onEtr/Pg==",
       "path": "system.commandline/2.0.0-beta4.22272.1",
       "hashPath": "system.commandline.2.0.0-beta4.22272.1.nupkg.sha512"
-    },
-    "System.Diagnostics.EventLog/6.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-lcyUiXTsETK2ALsZrX+nWuHSIQeazhqPphLfaRxzdGaG93+0kELqpgEHtwWOlQe7+jSFnKwaCAgL4kjeZCQJnw==",
-      "path": "system.diagnostics.eventlog/6.0.0",
-      "hashPath": "system.diagnostics.eventlog.6.0.0.nupkg.sha512"
-    },
-    "xunit/2.9.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-TlXQBinK35LpOPKHAqbLY4xlEen9TBafjs0V5KnA4wZsoQLQJiirCR4CbIXvOH8NzkW4YeJKP5P/Bnrodm0h9Q==",
-      "path": "xunit/2.9.3",
-      "hashPath": "xunit.2.9.3.nupkg.sha512"
-    },
-    "xunit.abstractions/2.0.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-pot1I4YOxlWjIb5jmwvvQNbTrZ3lJQ+jUGkGjWE3hEFM0l5gOnBWS+H3qsex68s5cO52g+44vpGzhAt+42vwKg==",
-      "path": "xunit.abstractions/2.0.3",
-      "hashPath": "xunit.abstractions.2.0.3.nupkg.sha512"
-    },
-    "xunit.assert/2.9.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-/Kq28fCE7MjOV42YLVRAJzRF0WmEqsmflm0cfpMjGtzQ2lR5mYVj1/i0Y8uDAOLczkL3/jArrwehfMD0YogMAA==",
-      "path": "xunit.assert/2.9.3",
-      "hashPath": "xunit.assert.2.9.3.nupkg.sha512"
-    },
-    "xunit.core/2.9.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-BiAEvqGvyme19wE0wTKdADH+NloYqikiU0mcnmiNyXaF9HyHmE6sr/3DC5vnBkgsWaE6yPyWszKSPSApWdRVeQ==",
-      "path": "xunit.core/2.9.3",
-      "hashPath": "xunit.core.2.9.3.nupkg.sha512"
-    },
-    "xunit.extensibility.core/2.9.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-kf3si0YTn2a8J8eZNb+zFpwfoyvIrQ7ivNk5ZYA5yuYk1bEtMe4DxJ2CF/qsRgmEnDr7MnW1mxylBaHTZ4qErA==",
-      "path": "xunit.extensibility.core/2.9.3",
-      "hashPath": "xunit.extensibility.core.2.9.3.nupkg.sha512"
-    },
-    "xunit.extensibility.execution/2.9.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-yMb6vMESlSrE3Wfj7V6cjQ3S4TXdXpRqYeNEI3zsX31uTsGMJjEw6oD5F5u1cHnMptjhEECnmZSsPxB6ChZHDQ==",
-      "path": "xunit.extensibility.execution/2.9.3",
-      "hashPath": "xunit.extensibility.execution.2.9.3.nupkg.sha512"
     }
   }
 }
