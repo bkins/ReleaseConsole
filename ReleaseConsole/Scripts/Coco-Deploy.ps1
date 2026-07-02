@@ -64,6 +64,48 @@ switch ($Environment) {
 Write-Host "Target: $deployPath"
 Write-Host ""
 
+function Stop-CocoProcessForDeploy {
+    param([string] $DeployPath)
+
+    $resolvedDeployPath = [System.IO.Path]::GetFullPath($DeployPath).TrimEnd('\')
+    $processes = @(Get-Process -Name "Coco.API" -ErrorAction SilentlyContinue | Where-Object {
+        try {
+            $processPath = [System.IO.Path]::GetFullPath($_.Path)
+            return $processPath.StartsWith($resolvedDeployPath, [System.StringComparison]::OrdinalIgnoreCase)
+        }
+        catch {
+            return $false
+        }
+    })
+
+    if ($processes.Count -eq 0) {
+        Write-Host "No running Coco.API process found for this deployment."
+        return
+    }
+
+    foreach ($process in $processes) {
+        Write-Host "Stopping running Coco.API process $($process.Id)..."
+        try {
+            if ($process.MainWindowHandle -ne 0) {
+                $process.CloseMainWindow() | Out-Null
+                if ($process.WaitForExit(5000)) {
+                    Write-Host "Stopped Coco.API process $($process.Id)."
+                    continue
+                }
+            }
+
+            Stop-Process -Id $process.Id -Force -ErrorAction Stop
+            $process.WaitForExit(5000)
+            Write-Host "Stopped Coco.API process $($process.Id)."
+        }
+        catch {
+            throw "Could not stop Coco.API process $($process.Id): $($_.Exception.Message)"
+        }
+    }
+}
+
+Stop-CocoProcessForDeploy -DeployPath $deployPath
+
 # Backup existing deployment
 if (Test-Path $deployPath) {
     $backupPath = "$deployPath.backup.$(Get-Date -Format 'yyyyMMdd-HHmmss')"

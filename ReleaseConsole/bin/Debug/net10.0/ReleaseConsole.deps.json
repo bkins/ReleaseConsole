@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v10.0": {
       "ReleaseConsole/1.0.0": {
         "dependencies": {
-          "CP.Client.Core": "0.1.47",
+          "CP.Client.Core": "0.1.59",
           "Microsoft.Extensions.DependencyInjection": "10.0.2",
           "Microsoft.Extensions.Logging": "10.0.2",
           "Microsoft.Extensions.Logging.Console": "10.0.2",
@@ -19,22 +19,22 @@
           "ReleaseConsole.dll": {}
         }
       },
-      "CP.Client.Core/0.1.47": {
+      "CP.Client.Core/0.1.59": {
         "dependencies": {
-          "CP.Shared.Primitives": "0.1.44"
+          "CP.Shared.Primitives": "0.1.52"
         },
         "runtime": {
           "lib/netstandard2.1/CP.Client.Core.dll": {
-            "assemblyVersion": "0.1.47.0",
-            "fileVersion": "0.1.47.0"
+            "assemblyVersion": "0.1.59.0",
+            "fileVersion": "0.1.59.0"
           }
         }
       },
-      "CP.Shared.Primitives/0.1.44": {
+      "CP.Shared.Primitives/0.1.52": {
         "runtime": {
           "lib/netstandard2.1/CP.Shared.Primitives.dll": {
-            "assemblyVersion": "0.1.44.0",
-            "fileVersion": "0.1.44.0"
+            "assemblyVersion": "0.1.52.0",
+            "fileVersion": "0.1.52.0"
           }
         }
       },
@@ -249,19 +249,19 @@
       "serviceable": false,
       "sha512": ""
     },
-    "CP.Client.Core/0.1.47": {
+    "CP.Client.Core/0.1.59": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-qEpDAUF6lDbSP6XgtvdkeCqXGvAgMSbSOUlSb1VdDizRMN2DjWf02+Avi91NNk1z+PyypaWe27Z1zjx7NYOnbQ==",
-      "path": "cp.client.core/0.1.47",
-      "hashPath": "cp.client.core.0.1.47.nupkg.sha512"
+      "sha512": "sha512-dkPRj1jajA9Iyq5gmanPGTcriieCWNT6brvFKB007X7AjGrPelZNl8GSmH7aQKJfzGUPauWNMVBomwAW3plUxA==",
+      "path": "cp.client.core/0.1.59",
+      "hashPath": "cp.client.core.0.1.59.nupkg.sha512"
     },
-    "CP.Shared.Primitives/0.1.44": {
+    "CP.Shared.Primitives/0.1.52": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-n9E7yYlskUz2yiWKDpCVUr6hfbKmatv8e/Zs9c8LSOkCgJFQd8eAJO8QKKALg8236czVXRmIyhrJ6t/OMiJsbg==",
-      "path": "cp.shared.primitives/0.1.44",
-      "hashPath": "cp.shared.primitives.0.1.44.nupkg.sha512"
+      "sha512": "sha512-PZ+WGarFxyRxcH3NC+fWCOpm37toeyiVMtfFFwtfWSsFdIXziAJY9fLaMlTPx9IxflbqnS/7v1Nd0Z04BgJkJQ==",
+      "path": "cp.shared.primitives/0.1.52",
+      "hashPath": "cp.shared.primitives.0.1.52.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/10.0.2": {
       "type": "package",

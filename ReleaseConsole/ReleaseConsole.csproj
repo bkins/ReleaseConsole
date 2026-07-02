@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CP.Client.Core" Version="0.1.47" />
+      <PackageReference Include="CP.Client.Core" Version="0.1.59" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />

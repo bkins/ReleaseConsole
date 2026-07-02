@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
     [string]$Environment,  # Still passed, but only for logging/metadata
@@ -38,10 +38,6 @@ dotnet publish $apiProject `
     -r win-x64 `
     --self-contained false `
     /p:UseAppHost=true `
-    /p:AssemblyName=$assemblyName `
-    /p:AssemblyTitle=$assemblyTitle `
-    /p:Product=$product `
-    /p:FileDescription=$assemblyName `
     /p:Version=$Version `
     /p:AssemblyVersion=$Version `
     /p:FileVersion=$Version `
