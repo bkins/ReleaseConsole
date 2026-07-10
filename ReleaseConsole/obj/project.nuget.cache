@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "ehFXX9SNr6Q=",
+  "dgSpecHash": "xCoYNiigNEk=",
   "success": true,
   "projectFilePath": "C:\\Users\\benho\\source\\repos\\ReleaseConsole\\ReleaseConsole\\ReleaseConsole.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\0.1.47\\cp.client.core.0.1.47.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\0.1.44\\cp.shared.primitives.0.1.44.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\1.0.0\\cp.client.core.1.0.0.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\1.0.0\\cp.shared.primitives.1.0.0.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.2\\microsoft.extensions.configuration.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.2\\microsoft.extensions.configuration.abstractions.10.0.2.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.2\\microsoft.extensions.configuration.binder.10.0.2.nupkg.sha512",

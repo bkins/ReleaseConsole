@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
 Builds and publishes local NuGet packages for CP shared libraries,
 automatically bumping the patch version.
@@ -67,10 +67,20 @@ $Projects = @{
     "Core"       = "C:\Users\benho\source\repos\CP.Client.Core\CP.Client.Core\CP.Client.Core.csproj"
 }
 
-function Increment-PatchVersion {
+function Update-ProjectVersion {
     param (
             [string]$ProjectPath
         )
+    
+        $versionFile = "C:\Users\benho\source\repos\CP\CP.Workbench\version.json"
+        if (-not (Test-Path $versionFile)) {
+            throw "Central version file not found at $versionFile"
+        }
+    
+        $versionJson = Get-Content $versionFile | ConvertFrom-Json
+        $newVersion = "$($versionJson.Major).$($versionJson.Minor).$($versionJson.Patch).$($versionJson.Build)"
+    
+        Write-Host "Updating version in $ProjectPath to $newVersion"
     
         [xml]$csproj = Get-Content $ProjectPath
         $versionNode = $csproj.SelectSingleNode("//Version")
@@ -80,22 +90,9 @@ function Increment-PatchVersion {
         }
     
         $currentVersion = $versionNode.InnerText.Trim()
-    
-        if ($currentVersion -notmatch '^\d+\.\d+\.\d+$') {
-            throw "Version '$currentVersion' is not in MAJOR.MINOR.PATCH format."
-        }
-    
-        $parts = $currentVersion.Split('.')
-        $major = [int]$parts[0]
-        $minor = [int]$parts[1]
-        $patch = [int]$parts[2] + 1
-    
-        $newVersion = "$major.$minor.$patch"
-        
         $versionNode.InnerText = $newVersion
         $csproj.Save($ProjectPath)
         
-        # Return the old version so Publish-Package can use it
         return $currentVersion
     }
     
@@ -104,7 +101,7 @@ function Increment-PatchVersion {
             [string]$ProjectPath
         )
     
-        $oldVersion = Increment-PatchVersion $ProjectPath
+        $oldVersion = Update-ProjectVersion $ProjectPath
         
         # Redirect verbose output to null
         dotnet build $ProjectPath -c Release > $null 2>&1

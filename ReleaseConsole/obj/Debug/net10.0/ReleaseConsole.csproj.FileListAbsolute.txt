@@ -1,5 +1,7 @@
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\API-Build.ps1
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\API-Deploy.ps1
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\Coco-Build.ps1
+C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\Coco-Deploy.ps1
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\Laa-Build.ps1
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\Laa-Deploy.ps1
 C:\Users\benho\source\repos\ReleaseConsole\ReleaseConsole\bin\Debug\net10.0\Scripts\publish-local-nuget.ps1

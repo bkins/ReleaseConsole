@@ -439,14 +439,41 @@ public sealed class BuildCommand : CommandBaseCommand
         return Path.Combine(_scriptsPath, scriptName);
     }
 
+    private static readonly object _versionLock = new();
+
     public static string GenerateVersion(string major = "1", string minor = "0")
     {
-        var now            = DateTime.UtcNow.ToLocalTime();
-        var epoch          = new DateTime(now.Year - 6, 1, 1);
-        var daysSinceEpoch = (now - epoch).Days;
-        var minutesToday   = (int)now.TimeOfDay.TotalMinutes;
-        
-        return $"{major}.{minor}.{daysSinceEpoch}.{minutesToday}";
+        lock (_versionLock)
+        {
+            var path = @"C:\Users\benho\source\repos\CP\CP.Workbench\version.json";
+            if (!System.IO.File.Exists(path))
+            {
+                return $"{major}.{minor}.0.1";
+            }
+
+            try
+            {
+                var json = System.IO.File.ReadAllText(path);
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                int majorVal = root.GetProperty("Major").GetInt32();
+                int minorVal = root.GetProperty("Minor").GetInt32();
+                int patchVal = root.GetProperty("Patch").GetInt32();
+                int buildVal = root.GetProperty("Build").GetInt32();
+
+                buildVal++;
+
+                // Write back updated build number
+                var updatedJson = $"{{\n  \"Major\": {majorVal},\n  \"Minor\": {minorVal},\n  \"Patch\": {patchVal},\n  \"Build\": {buildVal}\n}}";
+                System.IO.File.WriteAllText(path, updatedJson);
+
+                return $"{majorVal}.{minorVal}.{patchVal}.{buildVal}";
+            }
+            catch
+            {
+                return $"{major}.{minor}.0.1";
+            }
+        }
     }
 
     private static string GetGitCommitHash()

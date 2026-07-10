@@ -1,11 +1,11 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net10.0": {
-      "CP.Client.Core/0.1.47": {
+      "CP.Client.Core/1.0.0": {
         "type": "package",
         "dependencies": {
-          "CP.Shared.Primitives": "0.1.44"
+          "CP.Shared.Primitives": "1.0.0"
         },
         "compile": {
           "lib/netstandard2.1/CP.Client.Core.dll": {}
@@ -14,26 +14,6 @@
           "lib/netstandard2.1/CP.Client.Core.dll": {}
         },
         "contentFiles": {
-          "contentFiles/any/netstandard2.1/API-Client-Library_Flow.md": {
-            "buildAction": "Content",
-            "codeLanguage": "any",
-            "copyToOutput": false
-          },
-          "contentFiles/any/netstandard2.1/CP.Client.Core - Folder Structure.md": {
-            "buildAction": "Content",
-            "codeLanguage": "any",
-            "copyToOutput": false
-          },
-          "contentFiles/any/netstandard2.1/CP.Client.Core - litmus Test.md": {
-            "buildAction": "Content",
-            "codeLanguage": "any",
-            "copyToOutput": false
-          },
-          "contentFiles/any/netstandard2.1/CP.Client.Core.md": {
-            "buildAction": "Content",
-            "codeLanguage": "any",
-            "copyToOutput": false
-          },
           "contentFiles/any/netstandard2.1/CompleteCleanAndRebuild.ps1": {
             "buildAction": "Content",
             "codeLanguage": "any",
@@ -51,7 +31,7 @@
           }
         }
       },
-      "CP.Shared.Primitives/0.1.44": {
+      "CP.Shared.Primitives/1.0.0": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/CP.Shared.Primitives.dll": {}
@@ -372,38 +352,30 @@
     }
   },
   "libraries": {
-    "CP.Client.Core/0.1.47": {
-      "sha512": "qEpDAUF6lDbSP6XgtvdkeCqXGvAgMSbSOUlSb1VdDizRMN2DjWf02+Avi91NNk1z+PyypaWe27Z1zjx7NYOnbQ==",
+    "CP.Client.Core/1.0.0": {
+      "sha512": "7tEGsGD0OQwmbEaqX7ctQ7tXqn8J1nPZdAzyVbTR59JBHmHmF6gYmF7ik3h3kwjArEqc97RvqJIBbtfe4Kz2Zg==",
       "type": "package",
-      "path": "cp.client.core/0.1.47",
+      "path": "cp.client.core/1.0.0",
       "files": [
         ".nupkg.metadata",
-        "content/API-Client-Library_Flow.md",
-        "content/CP.Client.Core - Folder Structure.md",
-        "content/CP.Client.Core - litmus Test.md",
-        "content/CP.Client.Core.md",
         "content/CompleteCleanAndRebuild.ps1",
         "content/FilesAndFolders.ps1",
         "content/publish-local-nuget.ps1",
-        "contentFiles/any/netstandard2.1/API-Client-Library_Flow.md",
-        "contentFiles/any/netstandard2.1/CP.Client.Core - Folder Structure.md",
-        "contentFiles/any/netstandard2.1/CP.Client.Core - litmus Test.md",
-        "contentFiles/any/netstandard2.1/CP.Client.Core.md",
         "contentFiles/any/netstandard2.1/CompleteCleanAndRebuild.ps1",
         "contentFiles/any/netstandard2.1/FilesAndFolders.ps1",
         "contentFiles/any/netstandard2.1/publish-local-nuget.ps1",
-        "cp.client.core.0.1.47.nupkg.sha512",
+        "cp.client.core.1.0.0.nupkg.sha512",
         "cp.client.core.nuspec",
         "lib/netstandard2.1/CP.Client.Core.dll"
       ]
     },
-    "CP.Shared.Primitives/0.1.44": {
-      "sha512": "n9E7yYlskUz2yiWKDpCVUr6hfbKmatv8e/Zs9c8LSOkCgJFQd8eAJO8QKKALg8236czVXRmIyhrJ6t/OMiJsbg==",
+    "CP.Shared.Primitives/1.0.0": {
+      "sha512": "1x4mZvxGkN2ms3ezBb3i/I9PyqSgUex2sfVMEIsRvp1AFbJlmDuM5oB9vJTVe9Wf54C+HNZ0RdqhnqzWeEOx4w==",
       "type": "package",
-      "path": "cp.shared.primitives/0.1.44",
+      "path": "cp.shared.primitives/1.0.0",
       "files": [
         ".nupkg.metadata",
-        "cp.shared.primitives.0.1.44.nupkg.sha512",
+        "cp.shared.primitives.1.0.0.nupkg.sha512",
         "cp.shared.primitives.nuspec",
         "lib/netstandard2.1/CP.Shared.Primitives.dll"
       ]
@@ -900,7 +872,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
-      "CP.Client.Core >= 0.1.47",
+      "CP.Client.Core >= 1.0.0",
       "Microsoft.Extensions.DependencyInjection >= 10.0.2",
       "Microsoft.Extensions.Logging >= 10.0.2",
       "Microsoft.Extensions.Logging.Console >= 10.0.2",
@@ -940,6 +912,7 @@
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {}
         }
@@ -958,11 +931,12 @@
     },
     "frameworks": {
       "net10.0": {
+        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "CP.Client.Core": {
             "target": "Package",
-            "version": "[0.1.47, )"
+            "version": "[1.0.0, )"
           },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",
@@ -1001,7 +975,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
