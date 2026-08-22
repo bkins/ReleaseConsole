@@ -18,10 +18,10 @@
           }
         }
       },
-      "CP.Client.Core/0.1.59": {
+      "CP.Client.Core/1.0.0": {
         "type": "package",
         "dependencies": {
-          "CP.Shared.Primitives": "0.1.52"
+          "CP.Shared.Primitives": "1.0.0"
         },
         "compile": {
           "lib/netstandard2.1/CP.Client.Core.dll": {}
@@ -37,7 +37,7 @@
           }
         }
       },
-      "CP.Shared.Primitives/0.1.52": {
+      "CP.Shared.Primitives/1.0.0": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/CP.Shared.Primitives.dll": {}
@@ -796,7 +796,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
-          "CP.Client.Core": "0.1.59",
+          "CP.Client.Core": "1.0.0",
           "Microsoft.Extensions.DependencyInjection": "10.0.2",
           "Microsoft.Extensions.Logging": "10.0.2",
           "Microsoft.Extensions.Logging.Console": "10.0.2",
@@ -837,10 +837,10 @@
         "readme.txt"
       ]
     },
-    "CP.Client.Core/0.1.59": {
-      "sha512": "dkPRj1jajA9Iyq5gmanPGTcriieCWNT6brvFKB007X7AjGrPelZNl8GSmH7aQKJfzGUPauWNMVBomwAW3plUxA==",
+    "CP.Client.Core/1.0.0": {
+      "sha512": "7tEGsGD0OQwmbEaqX7ctQ7tXqn8J1nPZdAzyVbTR59JBHmHmF6gYmF7ik3h3kwjArEqc97RvqJIBbtfe4Kz2Zg==",
       "type": "package",
-      "path": "cp.client.core/0.1.59",
+      "path": "cp.client.core/1.0.0",
       "files": [
         ".nupkg.metadata",
         "content/CompleteCleanAndRebuild.ps1",
@@ -849,18 +849,18 @@
         "contentFiles/any/netstandard2.1/CompleteCleanAndRebuild.ps1",
         "contentFiles/any/netstandard2.1/FilesAndFolders.ps1",
         "contentFiles/any/netstandard2.1/publish-local-nuget.ps1",
-        "cp.client.core.0.1.59.nupkg.sha512",
+        "cp.client.core.1.0.0.nupkg.sha512",
         "cp.client.core.nuspec",
         "lib/netstandard2.1/CP.Client.Core.dll"
       ]
     },
-    "CP.Shared.Primitives/0.1.52": {
-      "sha512": "PZ+WGarFxyRxcH3NC+fWCOpm37toeyiVMtfFFwtfWSsFdIXziAJY9fLaMlTPx9IxflbqnS/7v1Nd0Z04BgJkJQ==",
+    "CP.Shared.Primitives/1.0.0": {
+      "sha512": "1x4mZvxGkN2ms3ezBb3i/I9PyqSgUex2sfVMEIsRvp1AFbJlmDuM5oB9vJTVe9Wf54C+HNZ0RdqhnqzWeEOx4w==",
       "type": "package",
-      "path": "cp.shared.primitives/0.1.52",
+      "path": "cp.shared.primitives/1.0.0",
       "files": [
         ".nupkg.metadata",
-        "cp.shared.primitives.0.1.52.nupkg.sha512",
+        "cp.shared.primitives.1.0.0.nupkg.sha512",
         "cp.shared.primitives.nuspec",
         "lib/netstandard2.1/CP.Shared.Primitives.dll"
       ]
@@ -1912,7 +1912,7 @@
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "C:\\Program Files\\dotnet\\library-packs": {},
-        "file://C:\\Users\\benho\\source\\NuGet\\Local": {},
+        "C:\\Users\\benho\\source\\NuGet\\Local": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1986,7 +1986,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

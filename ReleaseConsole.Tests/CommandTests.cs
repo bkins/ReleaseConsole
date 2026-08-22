@@ -27,7 +27,5 @@ public class CommandTests
         var command      = new DeployCommand(component, env, storage, executor, audit, logger);
 
         await command.ExecuteAsync();
-
-        //mockSelector.Verify(s => s.SelectVersionAsync(), Times.Once);
     }
-}
+}

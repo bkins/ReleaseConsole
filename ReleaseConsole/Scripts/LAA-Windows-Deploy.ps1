@@ -34,8 +34,8 @@ param (
     [ValidateSet("Dev", "QA", "Prod")]
     [string]$Environment
 
-  , [Parameter(Mandatory)]
-    [string]$Version
+  , [Parameter(Mandatory = $false)]
+    [string]$Version = "1.0.0.1"
 
   , [Parameter(Mandatory)]
     [string]$ArtifactPath
@@ -43,6 +43,7 @@ param (
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($Version)) { $Version = "1.0.0.1" }
 
 $exeName = "LocalAIAssistant.Ui.Maui.exe"
 

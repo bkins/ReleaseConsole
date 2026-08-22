@@ -3,8 +3,8 @@ param(
     [Parameter(Mandatory)]
     [string]$Environment,  # Still passed, but only for logging/metadata
     
-    [Parameter(Mandatory)]
-    [string]$Version,
+    [Parameter(Mandatory = $false)]
+    [string]$Version = "1.0.0.1",
     
     [Parameter(Mandatory)]
     [string]$OutputPath
@@ -12,6 +12,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($Version)) { $Version = "1.0.0.1" }
 $apiProject = "C:\Users\benho\source\repos\CognitivePlatform\CognitivePlatform\CognitivePlatform.Api.csproj"
 # ... your existing path detection logic ...
 

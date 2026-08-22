@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "gszRAUEF2yY=",
+  "dgSpecHash": "JntCZ2lPLEQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\benho\\source\\repos\\ReleaseConsole\\ReleaseConsole.Tests\\ReleaseConsole.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\benho\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\0.1.59\\cp.client.core.0.1.59.nupkg.sha512",
-    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\0.1.52\\cp.shared.primitives.0.1.52.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.client.core\\1.0.0\\cp.client.core.1.0.0.nupkg.sha512",
+    "C:\\Users\\benho\\.nuget\\packages\\cp.shared.primitives\\1.0.0\\cp.shared.primitives.1.0.0.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\fluentassertions\\8.8.0\\fluentassertions.8.8.0.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.codecoverage\\17.14.1\\microsoft.codecoverage.17.14.1.nupkg.sha512",
     "C:\\Users\\benho\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.2\\microsoft.extensions.configuration.10.0.2.nupkg.sha512",

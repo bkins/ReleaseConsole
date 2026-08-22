@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
 Installs a specific version of the Local AI Assistant APK to a connected Android device.
 
@@ -37,8 +37,8 @@ param(
     [Parameter(Mandatory)]
     [string]$SourcePath,
     
-    [Parameter(Mandatory)]
-    [string]$Version,
+    [Parameter(Mandatory = $false)]
+    [string]$Version = "1.0.0.1",
     
     [Parameter()]
     [string]$CurrentApkName,
@@ -49,6 +49,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($Version)) { $Version = "1.0.0.1" }
 
 $appIdMap = @{
     "Dev"  = "com.snikpoh.localaiassistant.dev"

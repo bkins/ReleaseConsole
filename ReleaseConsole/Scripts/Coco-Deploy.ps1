@@ -25,12 +25,13 @@ param(
     [Parameter(Mandatory)]
     [string]$SourcePath,
 
-    [Parameter(Mandatory)]
-    [string]$Version
+    [Parameter(Mandatory = $false)]
+    [string]$Version = "1.0.0.1"
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($Version)) { $Version = "1.0.0.1" }
 
 Write-Host "========================================"
 Write-Host "Deploying Coco.API"
