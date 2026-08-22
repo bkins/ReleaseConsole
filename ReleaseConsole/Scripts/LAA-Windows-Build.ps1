@@ -85,13 +85,27 @@ try {
     }
     New-Item -Path $OutputPath -ItemType Directory -Force | Out-Null
 
+    # Parse version into 3-part SemVer ApplicationDisplayVersion and integer ApplicationVersion for MAUI
+    $versionParts = $Version.Split('.')
+    if ($versionParts.Count -ge 4) {
+        $displayVersion = ($versionParts[0..2]) -join '.'
+        $appVersion     = [int]$versionParts[3]
+    } elseif ($versionParts.Count -eq 3) {
+        $displayVersion = $Version
+        $appVersion     = [int]$versionParts[2]
+    } else {
+        $displayVersion = "$Version.0.0"
+        $appVersion     = 1
+    }
+
     Log "Publishing MAUI Windows app..."
 
     dotnet publish $mauiProject `
         -c Release `
         -f net9.0-windows10.0.19041.0 `
         /p:ApplicationTitle="$appTitle" `
-        /p:ApplicationDisplayVersion="$Version" `
+        /p:ApplicationDisplayVersion="$displayVersion" `
+        /p:ApplicationVersion=$appVersion `
         /p:AppEnvironment="$Environment" `
         /p:ApiBaseUrl="$apiBaseUrl" `
         /p:WindowsPackageType=None `

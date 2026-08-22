@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
 Builds the Local AI Assistant MAUI application for ONE specific environment.
 
@@ -101,6 +101,19 @@ try {
         New-Item -Path $outputDir -ItemType Directory -Force | Out-Null
     }
 
+    # Parse version into 3-part SemVer ApplicationDisplayVersion and integer ApplicationVersion for MAUI
+    $versionParts = $Version.Split('.')
+    if ($versionParts.Count -ge 4) {
+        $displayVersion = ($versionParts[0..2]) -join '.'
+        $appVersion     = [int]$versionParts[3]
+    } elseif ($versionParts.Count -eq 3) {
+        $displayVersion = $Version
+        $appVersion     = [int]$versionParts[2]
+    } else {
+        $displayVersion = "$Version.0.0"
+        $appVersion     = 1
+    }
+
     # Build the APK for THIS environment ONLY
     Log "Publishing MAUI app..."
     
@@ -108,7 +121,8 @@ try {
         -c Release `
         -f net9.0-android `
         /p:ApplicationLabel="$appLabel" `
-        /p:ApplicationDisplayVersion="$Version" `
+        /p:ApplicationDisplayVersion="$displayVersion" `
+        /p:ApplicationVersion=$appVersion `
         /p:ApiEnvironmentName="$Environment" `
         /p:ApplicationId="$appId" `
         /p:AppEnvironment="$Environment" `
