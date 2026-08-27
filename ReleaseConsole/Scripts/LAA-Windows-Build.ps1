@@ -107,6 +107,7 @@ try {
         /p:ApplicationTitle="$appTitle" `
         /p:ApplicationDisplayVersion="$displayVersion" `
         /p:ApplicationVersion=$appVersion `
+        /p:ApiEnvironmentName="$Environment" `
         /p:AppEnvironment="$Environment" `
         /p:ApiBaseUrl="$apiBaseUrl" `
         /p:WindowsPackageType=None `
